@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منصة هند التعليمية — نموذج تفاعلي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --maroon:#4E0007; --maroon-2:#6a1219; --pink:#F8AA9E; --pink-soft:#fcd3cb; --cream:#FEE6D3; --beige:#E4C9B0;
+  --bg:#FFF8F3; --card:#ffffff; --ink:#2b0a0d; --muted:#7a5a5c; --line:#f1dccf;
+  --ok:#2f7d5b; --warn:#b7791f; --bad:#b42318;
+  --r:16px; --shadow:0 2px 10px rgba(78,0,7,.06), 0 10px 30px rgba(78,0,7,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--maroon)}
+h1,h2,h3,h4{margin:0 0 .4em;line-height:1.35;color:var(--maroon)}
+h1{font-size:clamp(28px,4.4vw,48px);font-weight:700}
+h2{font-size:clamp(22px,3vw,32px);font-weight:700}
+h3{font-size:18px;font-weight:600}
+h4{font-size:15px;font-weight:600}
+p{margin:0 0 .8em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"IBM Plex Sans Arabic",sans-serif}
+
+/* demo bar */
+#demobar{position:sticky;top:0;z-index:60;background:var(--maroon);color:#fff;display:flex;gap:10px;align-items:center;padding:8px 14px;flex-wrap:wrap;font-size:13px}
+#demobar .lbl{opacity:.8;white-space:nowrap}
+#demobar .roles{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+#demobar button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:4px 12px;cursor:pointer;white-space:nowrap}
+#demobar button.on{background:var(--pink);color:var(--maroon);border-color:var(--pink);font-weight:600}
+#demobar .scn{background:var(--cream);color:var(--maroon);font-weight:600;border:none}
+@media(max-width:860px){#demobar{flex-wrap:nowrap;padding:6px 10px}#demobar .lbl{display:none}#demobar .roles{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#demobar .roles::-webkit-scrollbar{display:none}.pub-nav{top:41px;padding:10px 4vw;gap:10px}.pub-nav .btn-o{display:none}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:10px 18px;cursor:pointer;font-weight:600;transition:.15s;text-decoration:none}
+.btn-p{background:var(--maroon);color:#fff}.btn-p:hover{background:var(--maroon-2)}
+.btn-s{background:var(--pink);color:var(--maroon)}.btn-s:hover{filter:brightness(.97)}
+.btn-o{background:transparent;border:1.5px solid var(--maroon);color:var(--maroon)}.btn-o:hover{background:var(--cream)}
+.btn-g{background:var(--cream);color:var(--maroon)}
+.btn-d{background:#fde8e6;color:var(--bad)}
+.btn-sm{padding:6px 12px;font-size:13px;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--cream);color:var(--maroon);white-space:nowrap}
+.chip.ok{background:#e3f3ea;color:var(--ok)}.chip.warn{background:#fdf1dc;color:var(--warn)}.chip.bad{background:#fde8e6;color:var(--bad)}.chip.pink{background:var(--pink-soft)}
+.chip.live{background:#fde8e6;color:var(--bad)}
+.chip.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+
+/* cards / layout */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;border:1px solid var(--line)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:980px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack>*+*{margin-top:12px}
+.sep{height:1px;background:var(--line);margin:14px 0}
+
+/* public site */
+.pub-nav{display:flex;align-items:center;gap:20px;padding:14px 5vw;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:41px;z-index:40}
+.pub-nav .links{display:flex;gap:18px;flex:1}
+.pub-nav .links a{text-decoration:none;color:var(--ink);font-weight:500;cursor:pointer}
+.pub-nav .links a:hover{color:var(--maroon)}
+@media(max-width:860px){.pub-nav .links{display:none}}
+.logo-h{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
+.logo-h img{height:44px}
+.logo-h .wm{display:flex;flex-direction:column;line-height:1.05}
+.logo-h .wm b{font-size:22px;color:var(--maroon)}
+.logo-h .wm span{font-size:11px;letter-spacing:.3em;color:var(--maroon)}
+.hero{position:relative;overflow:hidden;padding:70px 5vw 60px;background:linear-gradient(160deg,var(--cream),#fff 70%)}
+.pattern{position:absolute;inset:0;background-image:url(icon.png);background-size:46px auto;opacity:.07;pointer-events:none}
+.hero-in{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;max-width:1200px;margin:0 auto}
+@media(max-width:900px){.hero-in{grid-template-columns:1fr}}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:560px}
+.free-banner{display:inline-flex;gap:8px;align-items:center;background:var(--maroon);color:#fff;border-radius:999px;padding:6px 16px 6px 6px;font-size:13px;margin-bottom:18px}
+.free-banner b{background:var(--pink);color:var(--maroon);border-radius:999px;padding:2px 10px}
+.hero-visual{position:relative}
+.mock{background:#fff;border-radius:22px;box-shadow:0 30px 60px rgba(78,0,7,.15);padding:16px;border:1px solid var(--line)}
+.section{padding:64px 5vw}
+.section .in{max-width:1200px;margin:0 auto}
+.section.alt{background:#fff}
+.section.dark{background:var(--maroon);color:#fff}
+.section.dark h2,.section.dark h3{color:#fff}
+.feat .ic{width:46px;height:46px;border-radius:14px;background:var(--cream);display:grid;place-items:center;font-size:22px;margin-bottom:10px}
+.steps{counter-reset:s}
+.steps .card{position:relative;padding-top:34px}
+.steps .card::before{counter-increment:s;content:counter(s);position:absolute;top:-14px;right:20px;width:34px;height:34px;border-radius:50%;background:var(--maroon);color:#fff;display:grid;place-items:center;font-weight:700}
+.plan{display:flex;flex-direction:column}
+.plan.hl{border:2px solid var(--maroon);position:relative}
+.plan .price{font-size:34px;font-weight:700;color:var(--maroon)}
+.plan .price s{font-size:18px;color:var(--muted);font-weight:400;margin-inline-start:8px}
+.plan ul{padding:0 18px 0 0;margin:10px 0 16px;flex:1}
+.plan li{margin:4px 0}
+.ribbon{position:absolute;top:-12px;left:20px;background:var(--pink);color:var(--maroon);font-weight:700;font-size:12px;padding:3px 12px;border-radius:999px}
+.stat-big{font-size:38px;font-weight:700;color:var(--pink)}
+footer{background:#2b0004;color:#e9cfc7;padding:40px 5vw;font-size:14px}
+footer .in{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:24px}
+@media(max-width:800px){footer .in{grid-template-columns:1fr 1fr}}
+footer h4{color:#fff}
+footer a{color:#e9cfc7;display:block;text-decoration:none;cursor:pointer;margin:3px 0}
+
+/* app shell */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 41px)}
+.side{background:#fff;border-left:1px solid var(--line);padding:18px 14px;position:sticky;top:41px;height:calc(100vh - 41px);overflow:auto}
+.side .who{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:var(--cream);margin:14px 0}
+.side nav a{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:10px;color:var(--ink);text-decoration:none;cursor:pointer;font-weight:500;margin:2px 0}
+.side nav a:hover{background:var(--bg)}
+.side nav a.on{background:var(--maroon);color:#fff}
+.side nav a .n{margin-inline-start:auto;background:var(--pink);color:var(--maroon);border-radius:999px;font-size:11px;padding:0 7px;font-weight:700}
+.main{padding:26px 3vw 60px;min-width:0}
+.main-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+@media(max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-left:none;border-bottom:1px solid var(--line);padding:10px}
+  .side .who,.side .logo-h,.side .side-foot{display:none}
+  .side nav{display:flex;overflow-x:auto;gap:4px}
+  .side nav a{white-space:nowrap}
+}
+.av{width:38px;height:38px;border-radius:50%;background:var(--pink);color:var(--maroon);display:grid;place-items:center;font-weight:700;flex:none}
+.av.lg{width:56px;height:56px;font-size:20px}
+.kpi .v{font-size:28px;font-weight:700;color:var(--maroon);line-height:1.2}
+.kpi .l{color:var(--muted);font-size:13px}
+.kpi .d{font-size:12px;font-weight:600;color:var(--ok)}
+.bar{height:8px;background:var(--cream);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--maroon);border-radius:99px}
+.bar.pink>i{background:var(--pink)}
+.ring{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ring>div{width:84px;height:84px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:700;font-size:22px;color:var(--maroon)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:right;font-weight:600;color:var(--muted);font-size:13px;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl{overflow-x:auto}
+.list-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:none}
+.tabs{display:flex;gap:4px;background:var(--cream);padding:4px;border-radius:12px;width:fit-content;flex-wrap:wrap}
+.tabs button{border:none;background:transparent;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:500}
+.tabs button.on{background:#fff;color:var(--maroon);box-shadow:var(--shadow)}
+.notice{border-radius:14px;padding:12px 16px;background:var(--cream);border:1px dashed var(--beige);display:flex;gap:10px;align-items:flex-start}
+.notice.dark{background:var(--maroon);color:#fff;border:none}
+.chartbars{display:flex;align-items:flex-end;gap:8px;height:170px;padding-top:10px}
+.chartbars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.chartbars .b i{display:block;width:100%;max-width:38px;background:var(--maroon);border-radius:8px 8px 3px 3px}
+.chartbars .b i.t{background:var(--pink)}
+.chartbars .b span{font-size:11px;color:var(--muted)}
+
+/* forms */
+label.f{display:block;margin-bottom:12px}
+label.f>span{display:block;font-weight:500;margin-bottom:5px;font-size:14px}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;outline:none}
+.inp:focus{border-color:var(--pink)}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;margin-bottom:10px;background:#fff}
+.opt.on{border-color:var(--maroon);background:var(--cream)}
+.opt input{margin-top:6px;accent-color:var(--maroon)}
+.switch{position:relative;width:46px;height:26px;flex:none;cursor:pointer}
+.switch input{display:none}
+.switch i{position:absolute;inset:0;background:#e6d3c7;border-radius:99px;transition:.2s}
+.switch i::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked+i{background:var(--maroon)}
+.switch input:checked+i::after{right:23px}
+.wizard-steps{display:flex;gap:6px;margin-bottom:22px}
+.wizard-steps div{flex:1;height:6px;border-radius:9px;background:var(--line)}
+.wizard-steps div.on{background:var(--maroon)}
+
+/* quiz */
+.q-opt{display:block;width:100%;text-align:right;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin:8px 0;cursor:pointer}
+.q-opt:hover{border-color:var(--pink)}
+.q-opt.right{border-color:var(--ok);background:#e3f3ea}
+.q-opt.wrong{border-color:var(--bad);background:#fde8e6}
+
+/* overlays */
+#modal{position:fixed;inset:0;background:rgba(43,0,4,.45);display:none;z-index:200;align-items:center;justify-content:center;padding:16px}
+#modal.on{display:flex}
+#modal .box{background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:24px;position:relative}
+#modal .x{position:absolute;left:14px;top:12px;border:none;background:var(--cream);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px}
+#overlay{position:fixed;inset:0;z-index:150;background:#1d0204;display:none;color:#fff}
+#overlay.on{display:block}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--maroon);color:#fff;padding:12px 20px;border-radius:14px;z-index:300;transition:.3s;box-shadow:var(--shadow);max-width:90vw}
+#toast.on{transform:translateX(-50%) translateY(0)}
+
+/* live room */
+.room{display:grid;grid-template-rows:auto 1fr auto;height:100vh}
+.room-top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#2b0004;flex-wrap:wrap}
+.room-body{display:grid;grid-template-columns:1fr 320px;min-height:0}
+@media(max-width:860px){.room-body{grid-template-columns:1fr}.room-side{display:none}}
+.stage{padding:14px;display:grid;grid-template-rows:1fr auto;gap:12px;min-height:0;position:relative}
+.board{background:#fffdf9;color:var(--ink);border-radius:18px;padding:26px;overflow:auto;position:relative}
+.board h2{color:var(--maroon)}
+.wm-overlay{position:absolute;inset:0;pointer-events:none;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;opacity:.06;font-size:14px;transform:rotate(-18deg);color:var(--maroon);overflow:hidden}
+.tiles{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.tile{flex:none;width:120px;height:86px;border-radius:14px;background:#3a0a0e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;font-size:12px;border:2px solid transparent}
+.tile.speak{border-color:var(--pink)}
+.tile .hand{position:absolute;top:4px;left:6px;font-size:16px}
+.tile .mic{position:absolute;bottom:4px;right:6px;font-size:11px;opacity:.7}
+.tile.teacher{background:var(--pink);color:var(--maroon);width:150px}
+.room-side{background:#2b0004;display:flex;flex-direction:column;min-height:0;border-right:1px solid #4a1015}
+.room-side .tabs{background:#3a0a0e;margin:10px}
+.room-side .tabs button{color:#f5d7cf}
+.room-side .tabs button.on{background:var(--pink);color:var(--maroon)}
+.chat{flex:1;overflow:auto;padding:0 14px}
+.msg{background:#3a0a0e;border-radius:12px;padding:8px 12px;margin:8px 0;font-size:14px}
+.msg b{color:var(--pink);font-size:12px;display:block}
+.msg.t{background:#5a1b20}
+.room-ctrl{display:flex;justify-content:center;gap:10px;padding:12px;background:#2b0004;flex-wrap:wrap}
+.cbtn{background:#3a0a0e;border:none;color:#fff;border-radius:14px;padding:10px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;min-width:74px}
+.cbtn .i{font-size:18px}
+.cbtn.on{background:var(--pink);color:var(--maroon)}
+.cbtn.end{background:var(--bad)}
+.priv-pill{background:#3a0a0e;border-radius:999px;padding:4px 12px;font-size:12px;color:#f5d7cf}
+
+/* lesson player */
+.player{aspect-ratio:16/9;border-radius:18px;background:linear-gradient(135deg,var(--maroon),#7d1a22);position:relative;overflow:hidden;display:grid;place-items:center;color:#fff}
+.player .pattern{opacity:.08}
+.player .play{width:76px;height:76px;border-radius:50%;background:var(--pink);color:var(--maroon);border:none;font-size:28px;cursor:pointer;position:relative}
+.player .prog{position:absolute;bottom:0;right:0;left:0;height:6px;background:rgba(255,255,255,.2)}
+.player .prog i{display:block;height:100%;background:var(--pink);width:0}
+.player .cap{position:absolute;bottom:22px;right:0;left:0;text-align:center}
+.player .cap span{background:rgba(0,0,0,.55);padding:4px 12px;border-radius:8px;font-size:15px}
+.vocab{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.vocab button{border:none;background:var(--cream);width:34px;height:34px;border-radius:50%;cursor:pointer}
+
+/* certificate */
+.cert{background:#fff;border:1px solid var(--line);border-radius:12px;padding:30px;position:relative;overflow:hidden;direction:ltr;text-align:left}
+.cert .side-pat{position:absolute;top:0;bottom:0;right:0;width:22%;background-image:url(icon.png);background-size:40px auto;opacity:.35}
+.cert h3{letter-spacing:.06em;font-size:16px}
+
+/* scenario guide */
+#guide{position:fixed;bottom:18px;left:18px;width:330px;max-width:calc(100vw - 36px);background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(78,0,7,.25);z-index:120;display:none;border:2px solid var(--pink)}
+#guide.on{display:block}
+#guide .hd{background:var(--maroon);color:#fff;padding:10px 14px;border-radius:15px 15px 0 0;display:flex;justify-content:space-between;align-items:center}
+#guide ol{margin:0;padding:12px 30px 12px 14px;max-height:45vh;overflow:auto}
+#guide li{margin:6px 0;font-size:14px;cursor:pointer}
+@media(max-width:640px){#guide{left:8px;bottom:8px;width:calc(100vw - 16px)}#guide ol{max-height:20vh}}
+#guide li.done{color:var(--muted);text-decoration:line-through}
+#guide .hd button{background:none;border:none;color:#fff;cursor:pointer;font-size:16px}
+.scn-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:right}
+.yes{color:var(--ok);font-weight:700}.no{color:#c9b3aa}.part{color:var(--warn);font-weight:700}
+.post{padding:14px 0;border-bottom:1px solid var(--line)}
+.acc{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff}
+.acc summary{padding:12px 14px;cursor:pointer;font-weight:600}
+.acc div{padding:0 14px 12px}
+</style>
+</head>
+<body>
+<div id="demobar"></div>
+<div id="app"></div>
+<div id="overlay"></div>
+<div id="modal"><div class="box"><button class="x" onclick="closeModal()">✕</button><div id="mbody"></div></div></div>
+<div id="toast"></div>
+<div id="guide"></div>
+
+<script>
+/* ============ DATA ============ */
+const S = {
+  role: 'public',
+  view: 'home',
+  freePhase: true,
+  freeUntil: '30 يونيو 2027',
+  user: {name:'سارة أحمد المحمدي', display:'سارة', level:'A1', plan:'premium', code:'HIND100', age:'18-25', gov:'تعز', guardian:false, onlyNick:true, camOff:true, profileVis:'class'},
+  signup: {step:1, data:{}},
+  placement: null,
+  plans: [
+    {id:'free', name:'الأساسية', price:0, desc:'كل ما تحتاجه الطالبة لتبدأ', feats:['الدروس المباشرة الجماعية (حتى 12 طالبة)','مسار تعليمي كامل حسب المستوى','تمارين تفاعلية وواجبات','مجتمع الدارسات المُشرف عليه','وضع الصوت فقط لتوفير البيانات']},
+    {id:'premium', name:'المميزة', price:4, desc:'متابعة أقرب وتطوير أسرع', feats:['كل مزايا الخطة الأساسية','حلقات محادثة صغيرة (4 طالبات)','عيادة النطق الأسبوعية مع معلمة','تنزيل الدروس للمشاهدة دون إنترنت','شهادة إتمام معتمدة لكل مستوى','متابعة فردية شهرية']},
+    {id:'career', name:'المهنية', price:9, desc:'للعمل والدراسة الجامعية', feats:['كل مزايا الخطة المميزة','مسار إنجليزية العمل والمقابلات','تحضير لاختبارات IELTS / TOEFL','مراجعة السيرة الذاتية بالإنجليزية','جلسة إرشاد مهني شهرية']}
+  ],
+  codes: [
+    {code:'HIND100', pct:100, used:287, limit:1000, until:'30/06/2027', note:'كود مرحلة الإطلاق — مجاني بالكامل', active:true},
+    {code:'TEACHER-FAM', pct:100, used:41, limit:200, until:'31/12/2027', note:'لعائلات المعلمات', active:true},
+    {code:'PARTNER-A', pct:100, used:120, limit:150, until:'31/03/2027', note:'مقاعد مرعية من شريك (أ)', active:true},
+    {code:'STUDENT50', pct:50, used:0, limit:500, until:'—', note:'جاهز لمرحلة ما بعد الإطلاق', active:false}
+  ],
+  sessions: [
+    {id:1, title:'Greetings & Introductions — محادثة', level:'A1', teacher:'أ. أسماء القدسي', day:'اليوم', time:'4:00 م', dur:45, seats:12, booked:9, live:true, mine:true},
+    {id:2, title:'At the Market — مفردات التسوق', level:'A1', teacher:'أ. منى الحكيمي', day:'غداً', time:'10:00 ص', dur:45, seats:12, booked:7, mine:true},
+    {id:3, title:'Speaking Clinic — عيادة النطق', level:'A1', teacher:'أ. رنا العبسي', day:'الأحد', time:'7:00 م', dur:30, seats:4, booked:3, premium:true},
+    {id:4, title:'My Family — الأسرة والوصف', level:'A1', teacher:'أ. أسماء القدسي', day:'الاثنين', time:'4:00 م', dur:45, seats:12, booked:5},
+    {id:5, title:'Helping Kids with Homework', level:'A2', teacher:'أ. فاطمة الأهدل', day:'الثلاثاء', time:'8:00 م', dur:60, seats:12, booked:11},
+    {id:6, title:'Job Interview Basics', level:'B1', teacher:'أ. منى الحكيمي', day:'الأربعاء', time:'6:00 م', dur:60, seats:10, booked:4}
+  ],
+  tracks: [
+    {id:'daily', name:'إنجليزية الحياة اليومية', ic:'🌸', lvl:'A0 → A2', prog:42, units:['Greetings & Introductions','My Family','At the Market','At the Clinic','My Day','Phone Calls']},
+    {id:'moms', name:'إنجليزية الأمهات', ic:'👩‍👧', lvl:'A1 → A2', prog:10, units:['School Words','Reading Together','Talking to Teachers','Homework Help']},
+    {id:'work', name:'إنجليزية العمل والمقابلات', ic:'💼', lvl:'A2 → B1', prog:0, units:['Introducing Yourself Professionally','Emails','Job Interviews','Online Work']},
+    {id:'talk', name:'نادي المحادثة', ic:'💬', lvl:'كل المستويات', prog:25, units:['Daily Topics','Opinions','Stories','Presentations']}
+  ],
+  assignments: [
+    {id:1, title:'تمرين: التحيات والتعارف', type:'quiz', due:'اليوم', status:'pending'},
+    {id:2, title:'كتابة: عرّفي بنفسك في 5 جمل', type:'write', due:'غداً', status:'pending'},
+    {id:3, title:'تسجيل صوتي: Introduce your family', type:'audio', due:'الأحد', status:'pending'},
+    {id:4, title:'تمرين: الأرقام والألوان', type:'quiz', due:'منتهٍ', status:'graded', score:'9/10'}
+  ],
+  submissions: [
+    {id:1, student:'نور', task:'كتابة: عرّفي بنفسك', ans:'Hello! My name is Noor. I am from Ibb. I am 24 years old. I like reading books. I want to learn English for my work.', status:'new'},
+    {id:2, student:'رهف', task:'كتابة: عرّفي بنفسك', ans:'Hi, I am Rahaf. I live in Aden with my family. I have two sisters. I studying at university.', status:'new'},
+    {id:3, student:'أمل', task:'تسجيل صوتي: Introduce your family', ans:'🎧 ملف صوتي (0:48)', status:'new'},
+    {id:4, student:'ريم', task:'تمرين: الأرقام والألوان', ans:'تصحيح آلي: 8/10', status:'graded'}
+  ],
+  roster: [
+    ['نور','A1',96,'إب'],['رهف','A1',88,'عدن'],['أمل','A1',92,'صنعاء'],['ريم','A1',75,'تعز'],['م. س','A1',60,'حضرموت'],['هالة','A1',100,'الحديدة'],['بشرى','A1',84,'ذمار'],['دعاء','A1',70,'مأرب'],['إيمان','A1',90,'صنعاء']
+  ],
+  materials: [
+    {title:'Unit 1 — Greetings slides', type:'عرض تقديمي', by:'أ. أسماء القدسي', status:'approved'},
+    {title:'At the Market — vocabulary cards', type:'بطاقات', by:'أ. منى الحكيمي', status:'approved'},
+    {title:'Clinic dialogue — audio', type:'صوت', by:'أ. رنا العبسي', status:'review'}
+  ],
+  reports: [
+    {id:1, what:'حساب يُشتبه أنه ليس لامرأة (صوت رجالي في حلقة المحادثة)', where:'حلقة محادثة A2', by:'طالبة (هوية محمية)', sev:'عالية', status:'open'},
+    {id:2, what:'نشر رقم هاتف شخصي في مجتمع الدارسات', where:'مجتمع الدارسات', by:'نظام الرقابة الآلي', sev:'متوسطة', status:'open'},
+    {id:3, what:'تأخر المعلمة عن موعد الدرس 15 دقيقة', where:'درس B1 — الأربعاء', by:'3 طالبات', sev:'منخفضة', status:'open'},
+    {id:4, what:'محتوى إعلاني خارجي في تعليق', where:'مجتمع الدارسات', by:'طالبة', sev:'منخفضة', status:'closed'}
+  ],
+  teacherApps: [
+    {name:'خلود عبدالله', qual:'بكالوريوس لغة إنجليزية — جامعة صنعاء', exp:'4 سنوات', test:'C1', stage:'مقابلة'},
+    {name:'سمية علي', qual:'ماجستير لسانيات تطبيقية', exp:'7 سنوات', test:'C2', stage:'جديد'},
+    {name:'مريم ناصر', qual:'دبلوم TEFL + بكالوريوس تربية', exp:'2 سنتان', test:'B2+', stage:'جديد'},
+    {name:'ابتسام صالح', qual:'بكالوريوس آداب إنجليزي — جامعة عدن', exp:'5 سنوات', test:'C1', stage:'تدريب'}
+  ],
+  users: [
+    ['سارة','طالبة','A1','تعز','نشطة','HIND100'],['نور','طالبة','A1','إب','نشطة','HIND100'],['رهف','طالبة','A1','عدن','نشطة','PARTNER-A'],['أ. أسماء القدسي','معلمة','—','صنعاء','نشطة','—'],['أمل','طالبة','A2','صنعاء','نشطة','HIND100'],['ح. م','طالبة','A2','تعز','موقوفة — إعادة تحقق','HIND100'],['أ. منى الحكيمي','معلمة','—','عدن','نشطة','—'],['أم سارة (ولية أمر)','ولي أمر','—','تعز','نشطة','—'],['هالة','طالبة','B1','الحديدة','بانتظار التحقق','—']
+  ],
+  posts: [
+    {who:'أ. رنا العبسي', t:true, txt:'تحدي الأسبوع 🌸: اكتبي 3 جمل بالإنجليزية عن صباحك باستخدام (I usually…). أفضل الإجابات ستُعرض في درس الأحد!', likes:34, replies:['I usually wake up at 6 and make tea for my mother.','I usually read Quran then I study English 20 minutes.']},
+    {who:'نور', txt:'هل هناك فرق في النطق بين "ship" و "sheep"؟ دائماً أخلط بينهما 😅', likes:12, replies:['نعم! sheep صوت الياء فيها أطول. جربي تسجيل نفسك في عيادة النطق 👌']},
+    {who:'هالة', txt:'أكملت المستوى التمهيدي اليوم الحمد لله ✨ شكراً لكل المعلمات', likes:58, replies:[]}
+  ],
+  sponsor: {seats:10},
+  guardianOn: true,
+  notifs: 3,
+  done: {} // scenario steps
+};
+
+const ROLES = {
+  public:{label:'زائرة / الموقع العام', ic:'🌐'},
+  student:{label:'طالبة', ic:'🎓', who:'سارة', sub:'المستوى A1 — الخطة المميزة'},
+  teacher:{label:'معلمة', ic:'👩‍🏫', who:'أ. أسماء القدسي', sub:'معلمة لغة إنجليزية — 3 فصول'},
+  guardian:{label:'ولي الأمر', ic:'👪', who:'ولي أمر سارة', sub:'متابعة بإذن الطالبة'},
+  supervisor:{label:'مشرفة أكاديمية', ic:'🛡️', who:'أ. نجلاء الحداد', sub:'الإشراف والجودة'},
+  admin:{label:'الإدارة', ic:'⚙️', who:'إدارة هند', sub:'صلاحيات كاملة'},
+  partner:{label:'شريك / مستثمر', ic:'🤝', who:'جهة داعمة', sub:'لوحة الأثر'}
+};
+
+const NAV = {
+  student:[['dash','🏠','لوحتي'],['live','🎥','الدروس المباشرة'],['tracks','📚','مساراتي التعليمية'],['tasks','✍️','التمارين والواجبات',2],['community','💬','مجتمع الدارسات'],['certs','🏅','شهاداتي'],['sub','💳','اشتراكي'],['privacy','🔒','الخصوصية والأمان'],['support','🤍','الدعم والمساعدة']],
+  teacher:[['dash','🏠','لوحتي'],['schedule','📅','جدولي ودروسي'],['classes','👩‍🎓','فصولي والطالبات'],['grading','✅','الواجبات والتقييم',3],['content','🗂️','المحتوى التعليمي'],['academy','🌱','أكاديمية المعلمات'],['profile','👤','ملفي المهني']],
+  guardian:[['dash','📈','متابعة التقدم'],['attend','🗓️','الحضور والمواعيد'],['gset','⚙️','الإعدادات والموافقة']],
+  supervisor:[['dash','🛡️','لوحة الإشراف'],['monitor','🎥','الدروس الجارية'],['reports','🚩','البلاغات',3],['review','🗂️','مراجعة المحتوى'],['quality','⭐','جودة التعليم']],
+  admin:[['dash','📊','نظرة عامة'],['users','👥','المستخدمات'],['apps','📝','طلبات المعلمات',2],['codes','🏷️','أكواد الخصم'],['plans','💳','الخطط ومرحلة المجانية'],['impact','📈','تقارير الأثر'],['partners','🤝','الشركاء والرعاة'],['settings','⚙️','إعدادات المنصة']],
+  partner:[['dash','📈','لوحة الأثر'],['sponsor','🎁','رعاية المقاعد'],['preports','📄','التقارير الدورية']]
+};
+
+const SCENARIOS = [
+  {t:'تسجيل طالبة جديدة والانضمام مجاناً بكود الخصم', who:'زائرة → طالبة', go:()=>{setRole('public','signup')}, steps:['من الصفحة الرئيسية اضغطي "ابدئي مجاناً"','أدخلي البيانات واختاري اسماً ظاهراً (مستعاراً)','اختاري طريقة التحقق النسائي','أجيبي اختبار تحديد المستوى','اختاري الخطة المميزة وطبّقي الكود HIND100','لاحظي أن الإجمالي أصبح 0$ ثم ادخلي لوحتك']},
+  {t:'حضور درس مباشر بخصوصية كاملة', who:'طالبة', go:()=>setRole('student','live'), steps:['من "الدروس المباشرة" اضغطي "انضمي الآن" للدرس الجاري','لاحظي أن الكاميرا مغلقة افتراضياً والعلامة المائية باسمك','جرّبي "رفع اليد" و"وضع البيانات المنخفضة"','أرسلي رسالة في الدردشة ثم غادري الدرس']},
+  {t:'التعلم الذاتي: درس مسجل ومفردات بالنطق', who:'طالبة', go:()=>setRole('student','tracks'), steps:['افتحي مسار "إنجليزية الحياة اليومية"','اختاري وحدة Greetings وشغّلي الدرس','اضغطي 🔊 لسماع نطق المفردات','حلّي التمرين السريع في آخر الدرس']},
+  {t:'المعلمة تجدول درساً وتقيّم الواجبات', who:'معلمة', go:()=>setRole('teacher','schedule'), steps:['اضغطي "جدولة درس جديد" وأنشئي درساً','بدّلي لدور الطالبة وتأكدي من ظهور الدرس في جدولها','عودي للمعلمة → "الواجبات والتقييم" وقيّمي إجابة نور','ارفعي مادة تعليمية جديدة لتذهب للمراجعة']},
+  {t:'ولي الأمر يتابع التقدم بإذن الطالبة', who:'طالبة + ولي أمر', go:()=>setRole('student','privacy'), steps:['من "الخصوصية والأمان" فعّلي متابعة ولي الأمر وانسخي كود الدعوة','بدّلي لدور ولي الأمر وشاهدي التقدم والحضور','لاحظي أن ولي الأمر لا يرى الدردشة ولا التسجيلات']},
+  {t:'المشرفة تتعامل مع بلاغ أمني', who:'مشرفة', go:()=>setRole('supervisor','reports'), steps:['افتحي البلاغ عالي الخطورة','اختاري "تعليق الحساب وإعادة التحقق"','راجعي المادة التعليمية التي رفعتها المعلمة واعتمديها','ادخلي درساً جارياً للمراقبة المُعلنة']},
+  {t:'الإدارة تدير مرحلة المجانية وأكواد الخصم', who:'إدارة', go:()=>setRole('admin','codes'), steps:['أنشئي كوداً جديداً لجهة شريكة','انتقلي لـ"الخطط ومرحلة المجانية" وجرّبي إيقاف/تشغيل المرحلة المجانية','عودي للموقع العام ولاحظي تغيّر شريط الأسعار','راجعي تقارير الأثر (قبلي/بعدي)']},
+  {t:'عرض المنصة لشريك أو مستثمر', who:'شريك', go:()=>setRole('partner','dash'), steps:['استعرضي مؤشرات الأثر مقابل أهداف السنة الأولى','افتحي "رعاية المقاعد" واحسبي تكلفة رعاية 25 طالبة','اطلعي على نموذج الاستدامة وخطة الاستثمار']}
+];
+
+/* ============ HELPERS ============ */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)}
+function modal(h){$('#mbody').innerHTML=h;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+function setRole(r,v){S.role=r;S.view=v||(r==='public'?'home':'dash');closeOverlay();render();window.scrollTo(0,0)}
+function go(v){S.view=v;render();window.scrollTo(0,0)}
+function speak(w){try{const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast('النطق غير متاح في هذا المتصفح')}}
+function copyText(t){try{navigator.clipboard.writeText(t).then(()=>toast('تم النسخ ✓'),()=>toast('انسخي يدوياً: '+t))}catch(e){toast('انسخي يدوياً: '+t)}}
+const logoH = (w=false)=>`<a class="logo-h" onclick="setRole('public','home')"><img src="${w?'icon-w.png':'icon.png'}" alt=""><div class="wm"><b>هنـد</b><span>HIND</span></div></a>`;
+const kpi=(v,l,d)=>`<div class="card kpi"><div class="l">${l}</div><div class="v">${v}</div>${d?`<div class="d">${d}</div>`:''}</div>`;
+const bar=(p,c='')=>`<div class="bar ${c}"><i style="width:${p}%"></i></div>`;
+const ring=(p,l='')=>`<div class="ring" style="background:conic-gradient(var(--maroon) ${p*3.6}deg,var(--cream) 0)"><div>${p}%</div></div>`;
+const sw=(on,fn)=>`<label class="switch"><input type="checkbox" ${on?'checked':''} onchange="${fn}"><i></i></label>`;
+function planPrice(p,code){const c=S.codes.find(x=>x.code===code&&x.active);if(!c)return p.price;return +(p.price*(1-c.pct/100)).toFixed(2)}
+
+/* ============ DEMO BAR ============ */
+function renderBar(){
+  $('#demobar').innerHTML=`<span class="lbl">🔎 نسخة عرض — جرّبي المنصة بدور:</span><div class="roles">${Object.entries(ROLES).map(([k,r])=>`<button class="${S.role===k?'on':''}" onclick="setRole('${k}')">${r.ic} ${r.label}</button>`).join('')}</div><button class="scn" onclick="openScenarios()">🧭 السيناريوهات</button>`;
+}
+
+/* ============ RENDER ============ */
+function render(){
+  renderBar();
+  const app=$('#app');
+  if(S.role==='public'){app.innerHTML=PUB[S.view]?PUB[S.view]():PUB.home();return}
+  const nav=NAV[S.role], r=ROLES[S.role];
+  const fn=(V[S.role]&&V[S.role][S.view])||V[S.role].dash;
+  app.innerHTML=`<div class="shell"><aside class="side">${logoH()}
+    <div class="who"><div class="av">${r.who.replace('أ. ','')[0]}</div><div><b>${r.who}</b><div class="small muted">${r.sub}</div></div></div>
+    <nav>${nav.map(([k,i,l,n])=>`<a class="${S.view===k?'on':''}" onclick="go('${k}')"><span>${i}</span>${l}${n?`<span class="n">${n}</span>`:''}</a>`).join('')}</nav>
+    <div class="sep side-foot"></div><div class="side-foot small muted">🔒 بيئة نسائية آمنة ومغلقة<br>جميع البيانات مشفرة</div>
+  </aside><main class="main">${fn()}</main></div>`;
+}
+
+/* ============ PUBLIC SITE ============ */
+function pubNav(){return `<div class="pub-nav">${logoH()}<div class="links"><a onclick="goHome('about')">عن المبادرة</a><a onclick="goHome('how')">كيف تعمل</a><a onclick="goHome('safety')">الخصوصية والأمان</a><a onclick="goHome('pricing')">الخطط</a><a onclick="goHome('roles')">الأدوار</a><a onclick="goHome('partners')">للشركاء</a></div><button class="btn btn-o btn-sm" onclick="go('login')">تسجيل الدخول</button><button class="btn btn-p btn-sm" onclick="startSignup()">ابدئي مجاناً</button></div>`}
+function goHome(id){if(S.view!=='home'){S.view='home';render()}setTimeout(()=>{const e=document.getElementById(id);e&&e.scrollIntoView({behavior:'smooth',block:'start'})},30)}
+function footer(){return `<footer><div class="in"><div>${logoH(true)}<p style="margin-top:12px">منصة تعليمية نسائية آمنة لتعليم اللغة الإنجليزية للفتيات والسيدات اليمنيات — عبر الإنترنت، بأيدي معلمات يمنيات.</p><p class="small">www.HindLearn.com · info@hindlearn.com</p></div>
+<div><h4>المنصة</h4><a onclick="goHome('how')">كيف تعمل</a><a onclick="goHome('pricing')">الخطط</a><a onclick="go('placement')">اختبار تحديد المستوى</a></div>
+<div><h4>انضمي إلينا</h4><a onclick="startSignup()">سجّلي كطالبة</a><a onclick="go('teach')">انضمي كمعلمة</a><a onclick="goHome('partners')">كوني شريكاً</a></div>
+<div><h4>الثقة</h4><a onclick="goHome('safety')">سياسة الخصوصية</a><a onclick="goHome('safety')">ميثاق السلامة</a><a onclick="goHome('roles')">الأدوار والصلاحيات</a></div></div>
+<div class="in" style="display:block;margin-top:24px;opacity:.6" class="small">© 2026 هند — نموذج عرض تفاعلي، الأسماء والأرقام فيه توضيحية.</div></footer>`}
+
+const PUB = {
+home(){
+  const fb=S.freePhase?`<div class="free-banner"><b>مرحلة الإطلاق</b> التعليم مجاني بالكامل حتى ${S.freeUntil}</div>`:`<div class="free-banner"><b>جديد</b> خصومات خاصة للدفعة الأولى</div>`;
+  return pubNav()+`
+<section class="hero"><div class="pattern"></div><div class="hero-in">
+ <div>${fb}
+  <h1>تعلّمي الإنجليزية<br>في مساحة نسائية آمنة، من بيتك</h1>
+  <p class="lead">هند منصة تعليمية للفتيات والسيدات اليمنيات: دروس مباشرة أونلاين مع معلمات يمنيات، فصول نسائية مغلقة، خصوصية كاملة، ومحتوى من واقع حياتك اليومية.</p>
+  <div class="row" style="margin-top:22px"><button class="btn btn-p" onclick="startSignup()">ابدئي مجاناً الآن</button><button class="btn btn-o" onclick="go('placement')">اعرفي مستواك في 3 دقائق</button></div>
+  <div class="row small muted" style="margin-top:18px;gap:18px"><span>🔒 فصول نسائية فقط</span><span>👩‍🏫 معلمات يمنيات</span><span>📶 يعمل مع إنترنت ضعيف</span></div>
+ </div>
+ <div class="hero-visual"><div class="mock">
+   <div class="row between"><span class="chip live">مباشر الآن</span><span class="small muted">A1 · 9 طالبات</span></div>
+   <div style="background:var(--cream);border-radius:14px;padding:18px;margin:12px 0;direction:ltr;text-align:left"><b style="color:var(--maroon);font-size:20px">Greetings & Introductions</b><div style="margin-top:8px">👋 <b>Hello!</b> My name is ___.<br>🏡 I am from ___.<br>💬 Nice to meet you!</div></div>
+   <div class="row" style="gap:8px">${['أ. أسماء','سارة','نور','رهف','أمل'].map((n,i)=>`<div class="av" style="${i===0?'background:var(--maroon);color:#fff':''}">${n.replace('أ. ','')[0]}</div>`).join('')}<span class="small muted">+4</span></div>
+   <div class="notice small" style="margin-top:12px">📷 الكاميرا اختيارية ومغلقة افتراضياً · 🎙️ يمكنك المشاركة بالصوت أو الكتابة فقط</div>
+ </div></div>
+</div></section>
+
+<section class="section alt" id="about"><div class="in grid g2" style="align-items:center">
+ <div><span class="chip pink">لماذا هند؟</span><h2 style="margin-top:10px">التعليم حق، والطريق إليه يجب أن يكون آمناً ومناسباً</h2>
+ <p class="muted">كثير من الفتيات والسيدات في اليمن يواجهن صعوبات في الوصول للتعليم بسبب المسافات، وعدم توفر بيئة غير مختلطة، والظروف الاقتصادية. صممنا هند لتزيل هذه العوائق: تتعلمين من بيتك، مع نساء فقط، وفي وقت يناسبك.</p>
+ <p class="muted">الإنجليزية مفتاح للتعليم العالي والعمل والمعرفة — وهدفنا في السنة الأولى تدريب <b>500 طالبة</b> وتأهيل <b>50 معلمة يمنية</b>.</p></div>
+ <div class="grid g2">${[['🔒','بيئة نسائية مغلقة','كل الطالبات والمعلمات والمشرفات نساء، وكل حساب يتم التحقق منه.'],['🏡','من بيتك وبوقتك','دروس صباحية ومسائية، ومحتوى مسجّل متاح في أي وقت.'],['🇾🇪','من واقعك','محتوى عن السوق والعيادة والمدرسة والعمل — لا دروس بعيدة عن حياتك.'],['📶','خفيفة على الإنترنت','وضع الصوت فقط، وتنزيل الدروس للمشاهدة دون اتصال.']].map(f=>`<div class="card feat"><div class="ic">${f[0]}</div><h4>${f[1]}</h4><p class="small muted" style="margin:0">${f[2]}</p></div>`).join('')}</div>
+</div></section>
+
+<section class="section" id="how"><div class="in"><div style="text-align:center;max-width:640px;margin:0 auto 34px"><span class="chip pink">كيف تعمل المنصة</span><h2 style="margin-top:10px">من التسجيل إلى الشهادة في 5 خطوات</h2></div>
+ <div class="grid g3 steps" style="grid-template-columns:repeat(5,minmax(0,1fr))">${[['سجّلي باسم مستعار','لا نطلب صورتك، ويمكنك اختيار اسم يظهر للأخريات.'],['تحقق نسائي سريع','مكالمة قصيرة مع موظفة، أو دعوة من جهة شريكة.'],['اختبار تحديد المستوى','3 دقائق لتبدئي من المستوى المناسب لك.'],['دروس مباشرة + ذاتية','فصل صغير مع معلمة، وتمارين بين الدروس.'],['شهادة وتقدّم','شهادة لكل مستوى، ومتابعة تقدمك أسبوعياً.']].map(s=>`<div class="card"><h4>${s[0]}</h4><p class="small muted" style="margin:0">${s[1]}</p></div>`).join('')}</div>
+ <style>@media(max-width:900px){#how .steps{grid-template-columns:1fr 1fr!important}}@media(max-width:560px){#how .steps{grid-template-columns:1fr!important}}</style>
+ <div class="grid g4" style="margin-top:30px">${[['المستوى التمهيدي','A0','الحروف والأصوات والتحيات'],['المستوى الأول','A1','الحياة اليومية والأسرة والتسوق'],['المستوى الثاني','A2','المحادثة والقراءة والكتابة البسيطة'],['المستوى المتوسط','B1','العمل والدراسة والعروض التقديمية']].map(l=>`<div class="card"><span class="chip">${l[1]}</span><h4 style="margin-top:8px">${l[0]}</h4><p class="small muted" style="margin:0">${l[2]}</p></div>`).join('')}</div>
+</div></section>
+
+<section class="section alt" id="safety"><div class="in grid g2" style="align-items:center">
+ <div><span class="chip pink">الخصوصية والأمان</span><h2 style="margin-top:10px">خصوصيتك ليست ميزة إضافية — إنها أساس المنصة</h2>
+ <p class="muted">بنينا هند من الصفر لتكون بيئة يطمئن لها الطالبة وأسرتها معاً.</p>
+ <button class="btn btn-o" onclick="setRole('student','privacy')">شاهدي إعدادات الخصوصية من الداخل</button></div>
+ <div class="stack">${[['✅','تحقق نسائي لكل حساب','موظفات تحقق، والوثائق تُحذف فور انتهاء التحقق.'],['🎭','اسم مستعار وبدون صورة','لا يظهر اسمك الكامل أو رقمك لأي طالبة أخرى.'],['📷','الكاميرا مغلقة افتراضياً','شاركي بالصوت أو الكتابة فقط إن أردتِ.'],['💧','علامة مائية على الدروس','باسم كل طالبة لردع التصوير والنشر.'],['🚪','غرفة انتظار ومشرفات','لا يدخل الدرس إلا المسجلات فيه، ومشرفات يتابعن الجودة والبلاغات.'],['👪','متابعة ولي الأمر — بقرارك','يرى التقدم والحضور فقط، لا الدردشة ولا التسجيلات.']].map(x=>`<div class="row" style="align-items:flex-start;flex-wrap:nowrap"><div class="feat"><div class="ic" style="margin:0">${x[0]}</div></div><div><h4 style="margin:0">${x[1]}</h4><span class="small muted">${x[2]}</span></div></div>`).join('')}</div>
+</div></section>
+
+<section class="section" id="pricing"><div class="in">
+ <div style="text-align:center;max-width:680px;margin:0 auto 30px"><span class="chip pink">الخطط</span><h2 style="margin-top:10px">${S.freePhase?'مجانية بالكامل في مرحلة الإطلاق':'خطط تناسب كل طالبة'}</h2>
+ <p class="muted">${S.freePhase?`استخدمي كود الخصم <b class="en" style="color:var(--maroon)">HIND100</b> عند التسجيل لتحصلي على أي خطة مجاناً حتى ${S.freeUntil}.`:'ابدئي بالخطة الأساسية مجاناً، وترقّي متى شئتِ.'}</p></div>
+ <div class="grid g3">${S.plans.map((p,i)=>`<div class="card plan ${i===1?'hl':''}">${i===1?'<span class="ribbon">الأكثر اختياراً</span>':''}<h3>${p.name}</h3><p class="small muted">${p.desc}</p>
+ <div class="price">${S.freePhase||p.price===0?'0$':p.price+'$'}${S.freePhase&&p.price?`<s>${p.price}$/شهرياً</s>`:p.price?'<span class="small muted"> / شهرياً</span>':''}</div>
+ <ul>${p.feats.map(f=>`<li>${f}</li>`).join('')}</ul><button class="btn ${i===1?'btn-p':'btn-o'}" onclick="startSignup('${p.id}')">اختاري ${p.name}</button></div>`).join('')}</div>
+ <div class="notice" style="margin-top:20px">💡 <div class="small">بعد مرحلة الإطلاق ستبقى الخطة الأساسية مجانية دائماً، وستتوفر منح كاملة للطالبات غير القادرات بدعم الشركاء. طرق الدفع: المحافظ الإلكترونية المحلية، الحوالات، والبطاقات البنكية.</div></div>
+</div></section>
+
+<section class="section alt" id="roles"><div class="in">
+ <div style="text-align:center;max-width:680px;margin:0 auto 30px"><span class="chip pink">الأدوار والصلاحيات</span><h2 style="margin-top:10px">ستة أدوار تعمل معاً في منظومة واحدة</h2><p class="muted">اضغطي على أي دور لتجربته مباشرة.</p></div>
+ <div class="grid g3">${[['student','تتعلم، تحضر الدروس، تحل الواجبات، تشارك في المجتمع، وتتحكم في خصوصيتها.'],['teacher','تجدول الدروس، تدير الفصل المباشر، تصحح، ترفع المحتوى، وتتدرب في الأكاديمية.'],['guardian','يتابع التقدم والحضور فقط — بدعوة وموافقة من الطالبة.'],['supervisor','تراقب جودة الدروس، تعالج البلاغات، وتعتمد المحتوى قبل نشره.'],['admin','تدير المستخدمات والمعلمات والخطط وأكواد الخصم وتقارير الأثر.'],['partner','يتابع مؤشرات الأثر، ويرعى مقاعد دراسية، ويستلم التقارير.']].map(([k,d])=>`<div class="card" style="cursor:pointer" onclick="setRole('${k}')"><div class="row"><div class="ic" style="font-size:26px">${ROLES[k].ic}</div><h3 style="margin:0">${ROLES[k].label}</h3></div><p class="small muted" style="margin:8px 0 0">${d}</p></div>`).join('')}</div>
+ <div class="card tbl" style="margin-top:20px">${matrix()}</div>
+</div></section>
+
+<section class="section dark" id="partners"><div class="in grid g2" style="align-items:center">
+ <div><h2>للشركاء والداعمين والمستثمرين</h2><p style="opacity:.85">هند تبدأ مجانية لبناء الثقة وقاعدة الطالبات، ثم تنتقل لنموذج مستدام: خطة أساسية مجانية دائماً + خطط مدفوعة رمزية + مقاعد مرعية من الشركاء + خدمات مؤسسية.</p>
+ <div class="row"><button class="btn btn-s" onclick="setRole('partner')">شاهدي لوحة الأثر</button><button class="btn" style="background:transparent;color:#fff;border:1.5px solid #fff" onclick="openScenarios()">جولة عرض موجّهة</button></div></div>
+ <div class="grid g2">${[['500','طالبة — هدف السنة الأولى'],['50','معلمة يمنية مؤهلة'],['12','طالبة كحد أقصى لكل فصل'],['4','مستويات من A0 إلى B1']].map(x=>`<div><div class="stat-big">${x[0]}</div><div style="opacity:.85">${x[1]}</div></div>`).join('')}</div>
+</div></section>`+footer()},
+
+login(){return pubNav()+`<section class="section"><div class="in" style="max-width:440px"><div class="card"><h2>تسجيل الدخول</h2><p class="muted small">في النسخة الفعلية: رقم الجوال أو البريد + رمز تحقق. هنا اختاري الدور للتجربة.</p>
+<label class="f"><span>رقم الجوال أو البريد</span><input class="inp" value="+967 7xx xxx xxx" dir="ltr"></label><label class="f"><span>كلمة المرور</span><input class="inp" type="password" value="12345678"></label>
+<div class="grid g2">${['student','teacher','guardian','supervisor','admin','partner'].map(k=>`<button class="btn btn-g" onclick="setRole('${k}')">${ROLES[k].ic} ${ROLES[k].label}</button>`).join('')}</div>
+<p class="small muted" style="margin-top:12px">ليس لديك حساب؟ <a onclick="startSignup()" style="cursor:pointer">سجّلي مجاناً</a></p></div></div></section>`},
+
+teach(){return pubNav()+`<section class="section"><div class="in" style="max-width:640px"><div class="card"><span class="chip pink">انضمي كمعلمة</span><h2 style="margin-top:10px">علّمي بنات بلدك — من بيتك</h2><p class="muted">نبحث عن معلمات يمنيات بمستوى B2 فأعلى. تمر المتقدمة بـ: الطلب ← اختبار اللغة ← مقابلة ← برنامج تدريب (أكاديمية المعلمات) ← درس تجريبي مُشرف عليه ← الاعتماد.</p>
+<div class="grid g2"><label class="f"><span>الاسم</span><input class="inp"></label><label class="f"><span>المحافظة</span><select class="inp">${GOVS.map(g=>`<option>${g}</option>`).join('')}</select></label></div>
+<label class="f"><span>المؤهل العلمي</span><input class="inp" placeholder="مثال: بكالوريوس لغة إنجليزية"></label><label class="f"><span>سنوات الخبرة</span><input class="inp" type="number" value="2"></label>
+<label class="f"><span>السيرة الذاتية</span><input class="inp" type="file"></label>
+<button class="btn btn-p" onclick="S.teacherApps.unshift({name:'متقدمة جديدة',qual:'—',exp:'—',test:'لم يُختبر',stage:'جديد'});toast('تم استلام طلبك ✓ ستتواصل معك موظفة التوظيف');setTimeout(()=>setRole('admin','apps'),900)">إرسال الطلب</button></div></div></section>`},
+
+signup(){return pubNav()+`<section class="section"><div class="in" style="max-width:680px"><div class="card">${signupStep()}</div></div></section>`},
+placement(){return pubNav()+`<section class="section"><div class="in" style="max-width:640px"><div class="card">${placementView(false)}</div></div></section>`}
+};
+
+const GOVS=['صنعاء','عدن','تعز','الحديدة','إب','حضرموت','ذمار','مأرب','حجة','لحج','أبين','المهرة','شبوة','البيضاء','عمران','صعدة','الضالع','ريمة','الجوف','المحويت','سقطرى','خارج اليمن'];
+
+function matrix(){
+  const cols=['طالبة','معلمة','ولي أمر','مشرفة','إدارة','شريك'];
+  const rows=[['حضور الدروس المباشرة','y','y','n','p','p','n'],['إدارة الفصل وجدولة الدروس','n','y','n','p','y','n'],['رؤية الدردشة والتسجيلات','y','y','n','p','n','n'],['متابعة تقدم طالبة محددة','y','y','p','y','y','n'],['تصحيح الواجبات','n','y','n','n','n','n'],['اعتماد المحتوى','n','n','n','y','y','n'],['معالجة البلاغات','n','n','n','y','y','n'],['إدارة الخطط وأكواد الخصم','n','n','n','n','y','n'],['مؤشرات الأثر المجمّعة (بدون أسماء)','n','n','n','y','y','y']];
+  const m={y:'<span class="yes">✓</span>',n:'<span class="no">—</span>',p:'<span class="part">◐</span>'};
+  return `<table class="matrix"><tr><th>الصلاحية</th>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>${rows.map(r=>`<tr><td>${r[0]}</td>${r.slice(1).map(x=>`<td>${m[x]}</td>`).join('')}</tr>`).join('')}</table><p class="small muted" style="margin:10px 0 0">◐ = صلاحية جزئية: ولي الأمر بإذن الطالبة فقط · المشرفة تدخل الدرس بشكل مُعلن · الإدارة والشريك يرون بيانات مجمعة.</p>`;
+}
+
+/* ============ SIGNUP WIZARD ============ */
+function startSignup(plan){S.signup={step:1,data:{plan:plan||'premium',code:'',age:'18-25',verify:'call'}};S.placement=null;S.role='public';go('signup')}
+function sv(k,v){S.signup.data[k]=v}
+function signupStep(){
+  const st=S.signup.step,d=S.signup.data;
+  const head=`<div class="wizard-steps">${[1,2,3,4].map(i=>`<div class="${i<=st?'on':''}"></div>`).join('')}</div><div class="small muted">الخطوة ${st} من 4</div>`;
+  if(st===1)return head+`<h2>أهلاً بكِ في هند 🌸</h2><p class="muted">بياناتك الكاملة خاصة ولا تظهر لأحد. يظهر للأخريات اسمك الظاهر فقط.</p>
+  <div class="grid g2"><label class="f"><span>الاسم الكامل (خاص)</span><input class="inp" value="${esc(d.name||'')}" oninput="sv('name',this.value)" placeholder="يُستخدم للشهادة فقط"></label>
+  <label class="f"><span>الاسم الظاهر</span><input class="inp" value="${esc(d.display||'')}" oninput="sv('display',this.value)" placeholder="يمكن أن يكون اسماً مستعاراً"></label>
+  <label class="f"><span>رقم الجوال أو البريد</span><input class="inp" dir="ltr" placeholder="+967 7xx xxx xxx" oninput="sv('phone',this.value)"></label>
+  <label class="f"><span>المحافظة</span><select class="inp" onchange="sv('gov',this.value)">${GOVS.map(g=>`<option ${d.gov===g?'selected':''}>${g}</option>`).join('')}</select></label>
+  <label class="f"><span>الفئة العمرية</span><select class="inp" onchange="sv('age',this.value);render()">${['أقل من 18','18-25','26-40','أكبر من 40'].map(a=>`<option ${d.age===a?'selected':''}>${a}</option>`).join('')}</select></label>
+  <label class="f"><span>هدفك من التعلم</span><select class="inp">${['الدراسة الجامعية','العمل','مساعدة أطفالي','التواصل والسفر','تطوير ذاتي'].map(a=>`<option>${a}</option>`).join('')}</select></label></div>
+  ${d.age==='أقل من 18'?`<div class="notice">👪 <div class="small"><b>لأنك أقل من 18 سنة</b> نحتاج موافقة ولي الأمر. سنرسل له رسالة برابط موافقة، ويمكنه بعدها متابعة تقدمك وحضورك فقط.<label class="f" style="margin:8px 0 0"><input class="inp" dir="ltr" placeholder="رقم جوال ولي الأمر"></label></div></div>`:''}
+  <div class="row between" style="margin-top:18px"><span class="small muted">بالمتابعة توافقين على ميثاق السلامة وسياسة الخصوصية</span><button class="btn btn-p" onclick="if(!S.signup.data.display)S.signup.data.display=S.signup.data.name?S.signup.data.name.split(' ')[0]:'طالبة جديدة';S.signup.step=2;render()">التالي ←</button></div>`;
+  if(st===2)return head+`<h2>التحقق النسائي</h2><p class="muted">لضمان أن المنصة نسائية بالكامل، نتحقق من كل حساب مرة واحدة فقط. اختاري الطريقة المريحة لك:</p>
+  ${[['call','📞 مكالمة صوتية قصيرة مع موظفة التحقق','دقيقتان، في الوقت الذي تختارينه. لا فيديو.'],['id','🪪 صورة الهوية تراجعها موظفة','تُحذف الصورة نهائياً فور انتهاء التحقق.'],['invite','💌 دعوة من جهة شريكة أو معلمة','إذا وصلك كود دعوة من جمعية أو مدرسة شريكة.']].map(o=>`<label class="opt ${d.verify===o[0]?'on':''}"><input type="radio" name="v" ${d.verify===o[0]?'checked':''} onchange="sv('verify','${o[0]}');render()"><div><b>${o[1]}</b><div class="small muted">${o[2]}</div></div></label>`).join('')}
+  ${d.verify==='call'?`<label class="f"><span>الوقت المناسب للمكالمة</span><select class="inp"><option>اليوم 6:00 – 8:00 م</option><option>غداً 9:00 – 11:00 ص</option><option>غداً 4:00 – 6:00 م</option></select></label>`:d.verify==='id'?`<label class="f"><span>صورة الهوية</span><input type="file" class="inp" accept="image/*"></label>`:`<label class="f"><span>كود الدعوة</span><input class="inp" dir="ltr" placeholder="PARTNER-XXXX"></label>`}
+  <div class="notice small">⏳ يمكنك البدء بالدروس المسجلة والتمارين فوراً، وتُفتح الدروس المباشرة والمجتمع بعد التحقق.</div>
+  <div class="row between" style="margin-top:18px"><button class="btn btn-g" onclick="S.signup.step=1;render()">→ السابق</button><button class="btn btn-p" onclick="S.signup.step=3;render()">التالي ←</button></div>`;
+  if(st===3)return head+placementView(true);
+  if(st===4){
+    const p=S.plans.find(x=>x.id===d.plan), price=planPrice(p,d.code), c=S.codes.find(x=>x.code===d.code&&x.active);
+    return head+`<h2>اختاري خطتك</h2>${S.freePhase?`<div class="notice dark small">🎁 المنصة في مرحلة الإطلاق — استخدمي الكود <b class="en">HIND100</b> لتحصلي على أي خطة مجاناً.</div>`:''}
+    <div style="margin-top:14px">${S.plans.map(pl=>`<label class="opt ${d.plan===pl.id?'on':''}"><input type="radio" name="p" ${d.plan===pl.id?'checked':''} onchange="sv('plan','${pl.id}');render()"><div style="flex:1"><div class="row between"><b>${pl.name}</b><b style="color:var(--maroon)">${pl.price?pl.price+'$ / شهرياً':'مجانية'}</b></div><div class="small muted">${pl.feats.slice(0,3).join(' · ')}</div></div></label>`).join('')}</div>
+    <div class="row" style="flex-wrap:nowrap"><input id="cin" class="inp en" placeholder="كود الخصم" value="${esc(d.code||'')}" style="text-transform:uppercase"><button class="btn btn-s" onclick="applyCode()">تطبيق</button></div>
+    ${d.code?(c?`<p class="small" style="color:var(--ok);margin-top:6px">✓ تم تطبيق الكود ${c.code}: خصم ${c.pct}% — ${c.note}</p>`:`<p class="small" style="color:var(--bad);margin-top:6px">الكود غير صالح أو منتهٍ</p>`):''}
+    <div class="card" style="background:var(--bg);margin-top:14px"><div class="row between"><span>الخطة ${p.name}</span><span>${p.price}$</span></div>${c?`<div class="row between" style="color:var(--ok)"><span>خصم (${c.code})</span><span>-${(p.price-price).toFixed(2).replace('.00','')}$</span></div>`:''}<div class="sep"></div><div class="row between"><b>الإجمالي الشهري</b><b style="font-size:22px;color:var(--maroon)">${price}$</b></div>
+    ${price>0?`<div class="small muted" style="margin-top:6px">طرق الدفع: محفظة إلكترونية محلية · حوالة · بطاقة بنكية</div>`:`<div class="small muted" style="margin-top:6px">لا حاجة لأي بيانات دفع ✓</div>`}</div>
+    <div class="row between" style="margin-top:18px"><button class="btn btn-g" onclick="S.signup.step=3;render()">→ السابق</button><button class="btn btn-p" onclick="finishSignup()">${price>0?'المتابعة للدفع':'إنشاء حسابي مجاناً'} ✓</button></div>`;
+  }
+}
+function applyCode(){const v=($('#cin').value||'').trim().toUpperCase();S.signup.data.code=v;render()}
+function finishSignup(){
+  const d=S.signup.data,p=S.plans.find(x=>x.id===d.plan);
+  if(planPrice(p,d.code)>0){modal(`<h3>صفحة الدفع (توضيحية)</h3><p class="muted">في المرحلة الأولى نوصي بإبقاء الدفع مغلقاً واستخدام كود HIND100. في النسخة الفعلية تُربط هنا بوابة الدفع والمحافظ المحلية.</p><button class="btn btn-p" onclick="closeModal()">حسناً</button>`);return}
+  Object.assign(S.user,{name:d.name||S.user.name,display:d.display||S.user.display,plan:d.plan,code:d.code,gov:d.gov||S.user.gov,level:S.placement?S.placement.level:S.user.level});
+  const c=S.codes.find(x=>x.code===d.code);if(c)c.used++;
+  S.users.unshift([S.user.display,'طالبة',S.user.level,S.user.gov,'بانتظار التحقق',d.code||'—']);
+  ROLES.student.who=S.user.display;ROLES.student.sub=`المستوى ${S.user.level} — الخطة ${p.name}`;
+  setRole('student','dash');toast('🌸 مرحباً بكِ في هند! تم إنشاء حسابك');
+}
+
+/* ============ PLACEMENT ============ */
+const PQ=[
+ {q:'Choose the correct greeting for the morning:',o:['Good night','Good morning','Goodbye'],a:1},
+ {q:'"I ___ a teacher."',o:['am','is','are'],a:0},
+ {q:'What is the plural of "child"?',o:['childs','children','childes'],a:1},
+ {q:'"She ___ to the market every Friday."',o:['go','goes','going'],a:1},
+ {q:'Yesterday, we ___ our grandmother.',o:['visit','visited','will visit'],a:1},
+ {q:'If I had more time, I ___ learn French.',o:['will','would','am'],a:1}
+];
+function placementView(inWizard){
+  if(!S.placement)S.placement={i:0,score:0,ans:null};
+  const P=S.placement;
+  if(P.i>=PQ.length){
+    const lv=P.score<=1?'A0':P.score<=3?'A1':P.score<=4?'A2':'B1';P.level=lv;
+    const names={A0:'المستوى التمهيدي',A1:'المستوى الأول',A2:'المستوى الثاني',B1:'المستوى المتوسط'};
+    return `<div style="text-align:center"><div style="font-size:48px">🎉</div><h2>مستواك: ${names[lv]} <span class="en">(${lv})</span></h2><p class="muted">أجبتِ على ${P.score} من ${PQ.length} بشكل صحيح. سنضعك في فصل مناسب، ويمكنك إعادة الاختبار بعد شهر.</p>
+    ${inWizard?`<div class="row" style="justify-content:center"><button class="btn btn-g" onclick="S.signup.step=2;render()">→ السابق</button><button class="btn btn-p" onclick="S.signup.step=4;render()">التالي: اختيار الخطة ←</button></div>`:`<button class="btn btn-p" onclick="startSignup()">سجّلي الآن مجاناً</button>`}</div>`;
+  }
+  const q=PQ[P.i];
+  return `<div class="row between"><h3 style="margin:0">اختبار تحديد المستوى</h3><span class="chip">${P.i+1} / ${PQ.length}</span></div>${bar((P.i/PQ.length)*100,'pink')}
+  <p class="en" style="font-size:19px;font-weight:600;margin:22px 0 6px;text-align:left">${q.q}</p>
+  <div dir="ltr">${q.o.map((o,j)=>`<button class="q-opt en ${P.ans!==null?(j===q.a?'right':j===P.ans?'wrong':''):''}" style="text-align:left" ${P.ans!==null?'disabled':''} onclick="pAns(${j})">${o}</button>`).join('')}</div>
+  <div class="row between" style="margin-top:12px">${inWizard?`<button class="btn btn-g btn-sm" onclick="S.placement.i=99;S.placement.score=0;render()">تخطي (ابدئي من التمهيدي)</button>`:'<span></span>'}${P.ans!==null?`<button class="btn btn-p" onclick="S.placement.i++;S.placement.ans=null;render()">التالي ←</button>`:''}</div>`;
+}
+function pAns(j){const P=S.placement;P.ans=j;if(j===PQ[P.i].a)P.score++;render()}
+
+/* ============ QUIZ ENGINE ============ */
+const QZ={greet:[
+ {q:'How do you answer "How are you?"',o:['I am fine, thank you.','My name is Sara.','I am from Taiz.'],a:0},
+ {q:'"Nice to ___ you."',o:['see','meet','make'],a:1},
+ {q:'Which one is a question?',o:['I am Noor.','Where are you from?','She is a teacher.'],a:1},
+ {q:'Choose the correct word: "___ name is Amal."',o:['My','I','Me'],a:0}
+]};
+let QS={};
+function quizView(id,key){
+  const Q=QZ[key];QS[id]=QS[id]||{i:0,s:0,a:null};const st=QS[id];
+  if(st.i>=Q.length)return `<div style="text-align:center;padding:10px"><div style="font-size:40px">🌟</div><h3>أحسنتِ! ${st.s} / ${Q.length}</h3><p class="muted small">تمت إضافة النتيجة إلى تقدمك.</p><button class="btn btn-g btn-sm" onclick="QS['${id}']=null;render()">إعادة المحاولة</button></div>`;
+  const q=Q[st.i];
+  return `<div class="row between"><b>سؤال ${st.i+1} من ${Q.length}</b><span class="chip">${st.s} صحيحة</span></div><p class="en" style="font-size:17px;font-weight:600;text-align:left;margin:12px 0 4px">${q.q}</p><div dir="ltr">${q.o.map((o,j)=>`<button class="q-opt en ${st.a!==null?(j===q.a?'right':j===st.a?'wrong':''):''}" style="text-align:left" ${st.a!==null?'disabled':''} onclick="qAns('${id}','${key}',${j})">${o}</button>`).join('')}</div>${st.a!==null?`<div class="row between"><span class="small">${st.a===q.a?'✅ إجابة صحيحة!':'💡 الإجابة الصحيحة مظللة بالأخضر'}</span><button class="btn btn-p btn-sm" onclick="QS['${id}'].i++;QS['${id}'].a=null;rerenderQuiz('${id}','${key}')">التالي ←</button></div>`:''}`;
+}
+function qAns(id,key,j){const st=QS[id];st.a=j;if(j===QZ[key][st.i].a)st.s++;rerenderQuiz(id,key)}
+function rerenderQuiz(id,key){const el=document.getElementById('qz-'+id);if(el)el.innerHTML=quizView(id,key);else render()}
+
+/* ============ STUDENT ============ */
+const V={};
+V.student={
+dash(){const u=S.user, next=S.sessions.find(s=>s.mine);
+ return `<div class="main-head"><div><h2>أهلاً ${esc(u.display)} 🌸</h2><p class="muted" style="margin:0">لديك درس مباشر اليوم، وواجبان بانتظارك.</p></div>${S.freePhase?`<span class="chip pink">🎁 أنتِ في مرحلة الإطلاق المجانية — كود ${u.code||'HIND100'}</span>`:''}</div>
+ <div class="grid g3">
+  <div class="card" style="grid-column:span 2;background:linear-gradient(135deg,var(--maroon),#7a1820);color:#fff;border:none"><div class="row between"><span class="chip live" style="background:#fff">مباشر الآن</span><span style="opacity:.8" class="small">${next.dur} دقيقة · ${next.booked}/${next.seats} طالبة</span></div>
+   <h2 style="color:#fff;margin-top:12px" class="en">${next.title}</h2><p style="opacity:.85">مع ${next.teacher} · ${next.day} ${next.time}</p><button class="btn btn-s" onclick="openRoom('student',${next.id})">🎥 انضمي الآن</button> <button class="btn" style="background:rgba(255,255,255,.12);color:#fff" onclick="go('live')">كل الدروس</button></div>
+  <div class="card" style="text-align:center"><h4>تقدمك في المستوى ${u.level}</h4><div style="display:grid;place-items:center;margin:10px 0">${ring(42)}</div><p class="small muted" style="margin:0">الوحدة 3 من 6 — At the Market</p></div>
+ </div>
+ <div class="grid g4" style="margin-top:16px">${kpi('🔥 9 أيام','سلسلة التعلم المتواصل')}${kpi('14','درساً مباشراً حضرتِه','نسبة الحضور 93%')}${kpi('126','كلمة جديدة تعلمتِها')}${kpi('3','شارات إنجاز','🏅 المتحدثة الشجاعة')}</div>
+ <div class="grid g2" style="margin-top:16px">
+  <div class="card"><div class="row between"><h3>أكملي من حيث توقفتِ</h3><a class="small" style="cursor:pointer" onclick="go('tracks')">كل المسارات</a></div>${S.tracks.slice(0,3).map(t=>`<div class="list-item"><div style="font-size:26px">${t.ic}</div><div style="flex:1"><b>${t.name}</b><div class="small muted">${t.lvl}</div>${bar(t.prog)}</div><button class="btn btn-g btn-sm" onclick="openLesson('${t.id}',0)">متابعة</button></div>`).join('')}</div>
+  <div class="card"><div class="row between"><h3>واجبات قريبة</h3><a class="small" style="cursor:pointer" onclick="go('tasks')">الكل</a></div>${S.assignments.filter(a=>a.status==='pending').map(a=>`<div class="list-item"><div style="flex:1"><b>${a.title}</b><div class="small muted">التسليم: ${a.due}</div></div><button class="btn btn-p btn-sm" onclick="openTask(${a.id})">ابدئي</button></div>`).join('')}
+  <div class="notice small" style="margin-top:10px">📣 <div>تحدي الأسبوع في مجتمع الدارسات: اكتبي 3 جمل عن صباحك. <a style="cursor:pointer" onclick="go('community')">شاركي</a></div></div></div>
+ </div>`},
+live(){return `<div class="main-head"><div><h2>الدروس المباشرة</h2><p class="muted" style="margin:0">فصول نسائية صغيرة (12 طالبة كحد أقصى). التوقيت بتوقيت اليمن.</p></div><div class="tabs"><button class="on">هذا الأسبوع</button><button onclick="toast('عرض الأسبوع القادم في النسخة الفعلية')">القادم</button><button onclick="toast('الدروس المسجلة متاحة من مساراتك')">المسجلة</button></div></div>
+ <div class="grid g2">${S.sessions.map(s=>{const full=s.booked>=s.seats;const lock=s.premium&&S.user.plan==='free';return `<div class="card"><div class="row between"><span class="chip">${s.level}</span>${s.live?'<span class="chip live">مباشر الآن</span>':s.premium?'<span class="chip pink">⭐ المميزة</span>':''}</div>
+ <h3 class="en" style="margin-top:10px;text-align:left">${s.title}</h3><div class="small muted">👩‍🏫 ${s.teacher} · 🗓️ ${s.day} ${s.time} · ⏱️ ${s.dur} د</div>
+ <div style="margin:10px 0">${bar(s.booked/s.seats*100,'pink')}<div class="small muted">${s.booked} من ${s.seats} مقعد</div></div>
+ ${s.live&&s.mine?`<button class="btn btn-p" onclick="openRoom('student',${s.id})">🎥 انضمي الآن</button>`:s.mine?`<button class="btn btn-g" disabled>✓ محجوز</button> <button class="btn btn-o btn-sm" onclick="toast('سيصلك تذكير قبل الدرس بـ30 دقيقة 🔔')">🔔 تذكير</button>`:lock?`<button class="btn btn-g" onclick="go('sub')">🔒 متاح في الخطة المميزة</button>`:full?`<button class="btn btn-g" onclick="toast('أُضفتِ لقائمة الانتظار')">قائمة الانتظار</button>`:`<button class="btn btn-o" onclick="bookSession(${s.id})">احجزي مقعدك</button>`}</div>`}).join('')}</div>`},
+tracks(){return `<div class="main-head"><div><h2>مساراتي التعليمية</h2><p class="muted" style="margin:0">دروس مسجلة قصيرة (5-10 دقائق) + مفردات بالنطق + تمارين. تعمل حتى مع إنترنت ضعيف.</p></div><button class="btn btn-o btn-sm" onclick="toast('⬇️ تم تنزيل الوحدة للمشاهدة دون إنترنت')">⬇️ تنزيل للمشاهدة دون إنترنت</button></div>
+ ${S.tracks.map(t=>`<div class="card" style="margin-bottom:16px"><div class="row between"><div class="row"><div style="font-size:30px">${t.ic}</div><div><h3 style="margin:0">${t.name}</h3><span class="small muted">${t.lvl} · ${t.units.length} وحدات</span></div></div><div style="width:200px">${bar(t.prog)}<span class="small muted">${t.prog}% مكتمل</span></div></div>
+ <div class="grid g3" style="margin-top:14px">${t.units.map((u,i)=>{const done=i<Math.floor(t.prog/100*t.units.length);return `<div class="row" style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;flex-wrap:nowrap;cursor:pointer;background:${done?'var(--bg)':'#fff'}" onclick="openLesson('${t.id}',${i})"><span class="av" style="width:30px;height:30px;font-size:13px;${done?'background:var(--maroon);color:#fff':''}">${done?'✓':i+1}</span><span class="en" style="flex:1;font-size:14px">${u}</span><span>▶</span></div>`}).join('')}</div></div>`).join('')}`},
+tasks(){return `<div class="main-head"><h2>التمارين والواجبات</h2></div><div class="card tbl"><table><tr><th>الواجب</th><th>النوع</th><th>التسليم</th><th>الحالة</th><th></th></tr>${S.assignments.map(a=>`<tr><td><b>${a.title}</b></td><td>${{quiz:'🧩 تمرين تفاعلي',write:'✍️ كتابة',audio:'🎙️ تسجيل صوتي'}[a.type]}</td><td>${a.due}</td><td>${a.status==='graded'?`<span class="chip ok">مُقيَّم ${a.score}</span>`:a.status==='sent'?'<span class="chip warn">بانتظار التصحيح</span>':'<span class="chip">لم يُسلَّم</span>'}</td><td>${a.status==='pending'?`<button class="btn btn-p btn-sm" onclick="openTask(${a.id})">ابدئي</button>`:`<button class="btn btn-g btn-sm" onclick="toast('ملاحظة المعلمة: ممتاز! انتبهي لنطق th 🌸')">الملاحظات</button>`}</td></tr>`).join('')}</table></div>`},
+community(){return `<div class="main-head"><div><h2>مجتمع الدارسات</h2><p class="muted" style="margin:0">مساحة نسائية مُشرف عليها للتدرب والسؤال والتشجيع.</p></div><div class="tabs"><button class="on">حلقة A1</button><button onclick="toast('حلقات المستويات الأخرى')">حلقات أخرى</button><button onclick="toast('مجموعات مذاكرة صغيرة (3-5) قادمة')">مجموعات المذاكرة</button></div></div>
+ <div class="notice small" style="margin-bottom:14px">🛡️ <div><b>قواعد المجتمع:</b> لا أرقام هواتف ولا روابط خارجية ولا صور شخصية · الاحترام أولاً · كل منشور يمكن الإبلاغ عنه وتراجعه مشرفة.</div></div>
+ <div class="card" style="margin-bottom:14px"><textarea id="newpost" class="inp" rows="2" placeholder="اكتبي بالإنجليزية أو اسألي سؤالاً..."></textarea><div class="row between" style="margin-top:8px"><span class="small muted">ستظهرين باسم: <b>${esc(S.user.display)}</b></span><button class="btn btn-p btn-sm" onclick="addPost()">نشر</button></div></div>
+ <div class="card">${S.posts.map((p,i)=>`<div class="post"><div class="row"><div class="av" style="${p.t?'background:var(--maroon);color:#fff':''}">${p.who.replace('أ. ','')[0]}</div><div><b>${p.who}</b> ${p.t?'<span class="chip">معلمة</span>':''}</div></div><p style="margin:8px 0">${esc(p.txt)}</p>${p.replies.map(r=>`<div class="small" style="background:var(--bg);border-radius:10px;padding:6px 10px;margin:4px 0;direction:auto">↩ ${esc(r)}</div>`).join('')}<div class="row small" style="gap:16px;margin-top:6px"><a style="cursor:pointer" onclick="S.posts[${i}].likes++;render()">🤍 ${p.likes}</a><a style="cursor:pointer" onclick="replyPost(${i})">💬 ردّي</a><a style="cursor:pointer;color:var(--muted)" onclick="reportPost(${i})">🚩 إبلاغ</a></div></div>`).join('')}</div>`},
+certs(){return `<div class="main-head"><h2>شهاداتي</h2></div><div class="grid g2"><div><div class="cert"><div class="side-pat"></div><img src="logo-full.png" style="height:70px"><h3 style="margin-top:16px">CERTIFICATE OF COMPLETION</h3><div class="small">This is to certify that:</div><div style="color:var(--pink);font-size:22px;font-weight:700;margin:6px 0">${esc((S.user.name||'').toUpperCase())||'SARA AHMED'}</div><div class="small">has successfully completed:<br><b>English Starter Course / Level A0</b><br>24 training hours · Hind Learning Platform</div><div class="row" style="gap:40px;margin-top:20px;font-size:12px"><div>Trainer<br><b>A. Al-Qudsi</b></div><div>Director<br><b>Hind</b></div></div></div><div class="row" style="margin-top:10px"><button class="btn btn-p btn-sm" onclick="toast('في النسخة الفعلية: تنزيل PDF برمز تحقق')">تنزيل الشهادة</button><button class="btn btn-g btn-sm" onclick="copyText('hindlearn.com/verify/HND-A0-2291')">نسخ رابط التحقق</button></div></div>
+ <div class="card"><h3>المستوى A1 — قيد التقدم</h3>${bar(42)}<p class="small muted">تحتاجين: إكمال 6 وحدات · حضور 80% من الدروس المباشرة · اجتياز الاختبار النهائي.</p><div class="list-item">✅ حضور الدروس: 93%</div><div class="list-item">⏳ الوحدات: 2 من 6</div><div class="list-item">🔒 الاختبار النهائي: يُفتح بعد الوحدة 6</div></div></div>`},
+sub(){const p=S.plans.find(x=>x.id===S.user.plan)||S.plans[0];const price=planPrice(p,S.user.code);
+ return `<div class="main-head"><h2>اشتراكي</h2></div><div class="grid g2"><div class="card"><span class="chip pink">خطتك الحالية</span><h2 style="margin-top:10px">${p.name}</h2><div class="row"><span style="font-size:30px;font-weight:700;color:var(--maroon)">${price}$</span>${p.price?`<s class="muted">${p.price}$ / شهرياً</s>`:''}</div>
+ ${S.user.code?`<p class="small" style="color:var(--ok)">✓ كود ${S.user.code} مفعّل — ${(S.codes.find(c=>c.code===S.user.code)||{}).note||''}</p>`:''}
+ <p class="small muted">${S.freePhase?`مرحلة الإطلاق المجانية مستمرة حتى ${S.freeUntil}. سنخبرك قبل انتهائها بشهر، ولن يُخصم أي مبلغ دون موافقتك.`:'تجدد شهرياً.'}</p>
+ <div class="sep"></div><h4>كود خصم آخر؟</h4><div class="row" style="flex-wrap:nowrap"><input id="scode" class="inp en" placeholder="أدخلي الكود"><button class="btn btn-s" onclick="const v=$('#scode').value.trim().toUpperCase();if(S.codes.find(c=>c.code===v&&c.active)){S.user.code=v;toast('✓ تم تطبيق الكود');render()}else toast('الكود غير صالح')">تطبيق</button></div></div>
+ <div class="card"><h3>تغيير الخطة</h3>${S.plans.map(pl=>`<div class="list-item"><div style="flex:1"><b>${pl.name}</b><div class="small muted">${pl.feats[1]||pl.feats[0]}</div></div><span>${planPrice(pl,S.user.code)}$</span>${pl.id===S.user.plan?'<span class="chip ok">الحالية</span>':`<button class="btn btn-o btn-sm" onclick="S.user.plan='${pl.id}';ROLES.student.sub='المستوى '+S.user.level+' — الخطة ${pl.name}';toast('تم التغيير إلى ${pl.name}');render()">اختيار</button>`}</div>`).join('')}</div></div>
+ <div class="card" style="margin-top:16px"><h3>سجل الفواتير</h3><table><tr><th>التاريخ</th><th>الخطة</th><th>المبلغ</th><th>الحالة</th></tr><tr><td>01/11/2026</td><td>${p.name}</td><td>0$</td><td><span class="chip ok">مجاني — مرحلة الإطلاق</span></td></tr><tr><td>01/10/2026</td><td>${p.name}</td><td>0$</td><td><span class="chip ok">مجاني — مرحلة الإطلاق</span></td></tr></table></div>`},
+privacy(){const u=S.user;const row=(t,d,on,fn)=>`<div class="list-item"><div style="flex:1"><b>${t}</b><div class="small muted">${d}</div></div>${sw(on,fn)}</div>`;
+ return `<div class="main-head"><div><h2>الخصوصية والأمان</h2><p class="muted" style="margin:0">أنتِ من يقرر ما يُرى عنك.</p></div><span class="chip ok">✓ حسابك موثّق نسائياً</span></div>
+ <div class="grid g2"><div class="card"><h3>هويتي في المنصة</h3>
+ ${row('إظهار الاسم الظاهر فقط','لا يرى أحد اسمك الكامل أو رقمك — عدا موظفة التحقق',u.onlyNick,'S.user.onlyNick=this.checked')}
+ ${row('الكاميرا مغلقة افتراضياً في الدروس','يمكنك تشغيلها يدوياً متى أردتِ',u.camOff,'S.user.camOff=this.checked')}
+ ${row('السماح للطالبات بمراسلتي داخل المنصة','الرسائل داخلية ومراقبة، بلا أرقام هواتف',false,"toast('تم الحفظ')")}
+ ${row('إظهار شاراتي وتقدمي في المجتمع','',true,"toast('تم الحفظ')")}
+ <label class="f" style="margin-top:12px"><span>الاسم الظاهر</span><input class="inp" value="${esc(u.display)}" onchange="S.user.display=this.value;ROLES.student.who=this.value;toast('تم التحديث')"></label></div>
+ <div class="card"><h3>👪 متابعة ولي الأمر</h3><p class="small muted">اختياري للبالغات، وإلزامي لمن هن أقل من 18. يرى ولي الأمر: التقدم، الحضور، المواعيد، واسم المعلمة. <b>لا يرى</b>: الدردشة، التسجيلات، المجتمع.</p>
+ ${row('تفعيل متابعة ولي الأمر','يمكنك إيقافها في أي وقت (للبالغات)',S.guardianOn,'S.guardianOn=this.checked;render()')}
+ ${S.guardianOn?`<div class="notice" style="margin-top:10px"><div style="flex:1"><div class="small">كود الدعوة لولي الأمر:</div><b class="en" style="font-size:20px;color:var(--maroon)">HG-58X2-SARA</b></div><button class="btn btn-g btn-sm" onclick="copyText('HG-58X2-SARA')">نسخ</button></div><button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setRole('guardian')">شاهدي ما يراه ولي الأمر ←</button>`:''}
+ <div class="sep"></div><h3>بياناتي</h3><div class="row"><button class="btn btn-g btn-sm" onclick="toast('سيصلك ملف ببياناتك خلال 24 ساعة')">طلب نسخة من بياناتي</button><button class="btn btn-d btn-sm" onclick="modal('<h3>حذف الحساب</h3><p class=muted>سيتم حذف بياناتك نهائياً خلال 30 يوماً، مع الاحتفاظ بشهاداتك برمز تحقق فقط.</p><button class=\\'btn btn-d\\' onclick=closeModal()>تأكيد (توضيحي)</button>')">حذف حسابي</button></div></div></div>`},
+support(){return `<div class="main-head"><div><h2>الدعم والمساعدة</h2><p class="muted" style="margin:0">فريق دعم نسائي بالكامل · يومياً 9 ص – 9 م</p></div></div><div class="grid g2"><div>${[['الإنترنت ضعيف عندي، هل أستطيع الحضور؟','نعم. فعّلي "وضع البيانات المنخفضة" داخل الدرس ليصلك الصوت والسبورة فقط، ويمكنك مشاهدة التسجيل لاحقاً.'],['فاتني الدرس، ماذا أفعل؟','التسجيل متاح لطالبات الفصل خلال 48 ساعة، ويمكنك حجز درس تعويضي.'],['هل يمكن لأحد رؤيتي؟','الكاميرا مغلقة افتراضياً، ولا يرى أحد صورتك إلا إذا شغلتها بنفسك، والفصل نسائي بالكامل.'],['كيف أحصل على الشهادة؟','أكملي الوحدات، واحضري 80% من الدروس، واجتازي الاختبار النهائي للمستوى.'],['ماذا بعد انتهاء المرحلة المجانية؟','تبقى الخطة الأساسية مجانية، وستُتاح منح كاملة للطالبات غير القادرات.']].map(f=>`<details class="acc"><summary>${f[0]}</summary><div class="small muted">${f[1]}</div></details>`).join('')}</div>
+ <div class="card"><h3>راسلي فريق الدعم</h3><label class="f"><span>الموضوع</span><select class="inp"><option>مشكلة تقنية</option><option>الدروس والمعلمات</option><option>الاشتراك وكود الخصم</option><option>بلاغ خصوصية أو أمان</option></select></label><label class="f"><span>رسالتك</span><textarea class="inp" rows="4"></textarea></label><button class="btn btn-p" onclick="toast('✓ وصلت رسالتك — رقم التذكرة #4821')">إرسال</button><p class="small muted" style="margin-top:10px">أو عبر واتساب الدعم: <span dir="ltr">+967 777 000 111</span></p></div></div>`}
+};
+function bookSession(id){const s=S.sessions.find(x=>x.id===id);s.booked++;s.mine=true;toast('✓ تم حجز مقعدك — سيصلك تذكير قبل الدرس');render()}
+function addPost(){const t=$('#newpost').value.trim();if(!t)return;S.posts.unshift({who:S.user.display,txt:t,likes:0,replies:[]});if(/\d{7,}|http/.test(t)){S.reports.unshift({id:Date.now(),what:'منشور يحتوي رقماً أو رابطاً — أُخفي تلقائياً',where:'مجتمع الدارسات',by:'نظام الرقابة الآلي',sev:'متوسطة',status:'open'});toast('⚠️ تم إخفاء المنشور لاحتوائه على رقم/رابط وأُرسل للمراجعة')}else toast('✓ تم النشر');render()}
+function replyPost(i){modal(`<h3>ردّك</h3><textarea id="rp" class="inp" rows="3"></textarea><button class="btn btn-p" style="margin-top:10px" onclick="S.posts[${i}].replies.push($('#rp').value||'👍');closeModal();render()">إرسال</button>`)}
+function reportPost(i){modal(`<h3>🚩 إبلاغ عن منشور</h3><p class="muted small">هويتك محمية ولن تُعرض لصاحبة المنشور.</p>${['محتوى غير لائق','معلومات شخصية (رقم/عنوان)','حساب مشبوه','إعلان أو رابط خارجي','أخرى'].map((r,j)=>`<label class="opt"><input type="radio" name="rr" ${j===0?'checked':''} value="${r}"><span>${r}</span></label>`).join('')}<button class="btn btn-p" onclick="S.reports.unshift({id:Date.now(),what:'بلاغ على منشور: '+document.querySelector('input[name=rr]:checked').value,where:'مجتمع الدارسات',by:'طالبة (هوية محمية)',sev:'متوسطة',status:'open'});closeModal();toast('✓ وصل البلاغ للمشرفة')">إرسال البلاغ</button>`)}
+function openTask(id){const a=S.assignments.find(x=>x.id===id);
+ const body=a.type==='quiz'?`<div id="qz-t${id}">${quizView('t'+id,'greet')}</div>`:a.type==='write'?`<p class="muted small">اكتبي 5 جمل تعرّفين فيها بنفسك. استخدمي: My name is… / I am from… / I like…</p><textarea id="wt" class="inp en" rows="6" dir="ltr"></textarea>`:`<p class="muted small">سجّلي صوتك وأنتِ تعرّفين بأسرتك (30–60 ثانية) من تطبيق التسجيل في جوالك، ثم ارفعي الملف. صوتك يصل للمعلمة فقط.</p><input type="file" class="inp" accept="audio/*">`;
+ modal(`<h3>${a.title}</h3>${body}<button class="btn btn-p" style="margin-top:14px" onclick="submitTask(${id})">تسليم الواجب</button>`)}
+function submitTask(id){const a=S.assignments.find(x=>x.id===id);a.status='sent';if(a.type!=='quiz')S.submissions.unshift({id:Date.now(),student:S.user.display,task:a.title,ans:a.type==='write'?($('#wt')&&$('#wt').value)||'(نص الطالبة)':'🎧 ملف صوتي',status:'new'});closeModal();toast('✓ تم التسليم — ستصلك ملاحظات المعلمة');render()}
+
+/* ============ LESSON PLAYER ============ */
+const LESSON={vocab:[['Hello','مرحباً'],['Good morning','صباح الخير'],['My name is…','اسمي…'],['Nice to meet you','تشرفت بمعرفتك'],['Where are you from?','من أين أنتِ؟'],['I am from Sana\'a','أنا من صنعاء'],['Thank you','شكراً'],['See you tomorrow','أراكِ غداً']],
+ lines:[['Teacher','Good morning, everyone! My name is Asma.'],['Sara','Good morning, teacher. My name is Sara.'],['Teacher','Nice to meet you, Sara. Where are you from?'],['Sara','I am from Taiz. Nice to meet you too!']]};
+let LP={tab:'vocab',t:0,timer:null};
+function openLesson(tid,ui){const t=S.tracks.find(x=>x.id===tid);LP={tab:'vocab',t:0,timer:null,track:t,unit:ui};drawLesson();$('#overlay').classList.add('on');$('#overlay').style.background='var(--bg)';$('#overlay').style.color='var(--ink)';$('#overlay').style.overflow='auto'}
+function drawLesson(){const t=LP.track,u=t.units[LP.unit];const cap=LESSON.lines[Math.min(3,Math.floor(LP.t/25))];
+ $('#overlay').innerHTML=`<div style="max-width:1000px;margin:0 auto;padding:20px"><div class="row between"><div class="row">${logoH()}<span class="muted">/ ${t.name}</span></div><button class="btn btn-g" onclick="closeOverlay()">✕ إغلاق</button></div>
+ <div class="grid" style="grid-template-columns:1.4fr 1fr;margin-top:16px" id="lgrid"><div><div class="player"><div class="pattern"></div>${LP.timer?`<div class="en" style="font-size:28px;font-weight:700;position:relative">${u}</div>`:`<button class="play" onclick="playLesson()">▶</button>`}<div class="cap">${LP.timer||LP.t?`<span class="en">${cap[0]}: ${cap[1]}</span>`:''}</div><div class="prog"><i style="width:${LP.t}%"></i></div></div>
+ <div class="row between" style="margin-top:12px"><div><h3 class="en" style="margin:0;text-align:left">${u}</h3><span class="small muted">الوحدة ${LP.unit+1} · 8 دقائق · ترجمة عربية متاحة</span></div><div class="row"><button class="btn btn-g btn-sm" onclick="toast('سرعة التشغيل: 0.75x')">0.75x</button><button class="btn btn-g btn-sm" onclick="toast('⬇️ تم التنزيل للمشاهدة دون إنترنت')">⬇️</button><button class="btn btn-g btn-sm" onclick="toast('🎧 وضع الصوت فقط — يوفر 90% من البيانات')">🎧 صوت فقط</button></div></div></div>
+ <div class="card"><div class="tabs">${[['vocab','المفردات'],['script','الحوار'],['quiz','تمرين سريع']].map(x=>`<button class="${LP.tab===x[0]?'on':''}" onclick="LP.tab='${x[0]}';drawLesson()">${x[1]}</button>`).join('')}</div><div style="margin-top:14px">
+ ${LP.tab==='vocab'?`<div class="stack">${LESSON.vocab.map(v=>`<div class="vocab"><button onclick="speak('${v[0].replace(/'/g,"\\'")}')">🔊</button><b class="en" style="flex:1;text-align:left">${v[0]}</b><span class="muted">${v[1]}</span></div>`).join('')}</div>`:LP.tab==='script'?LESSON.lines.map(l=>`<div class="msg en" style="background:${l[0]==='Teacher'?'var(--cream)':'#fff'};color:var(--ink);border:1px solid var(--line);text-align:left;direction:ltr"><b style="color:var(--maroon)">${l[0]}</b>${l[1]} <a style="cursor:pointer" onclick="speak('${l[1].replace(/'/g,"\\'")}')">🔊</a></div>`).join(''):`<div id="qz-lesson">${quizView('lesson','greet')}</div>`}
+ </div></div></div><div class="row between" style="margin-top:16px"><button class="btn btn-o" ${LP.unit===0?'disabled':''} onclick="LP.unit--;LP.t=0;clearInterval(LP.timer);LP.timer=null;drawLesson()">→ الوحدة السابقة</button><button class="btn btn-p" onclick="if(LP.unit<LP.track.units.length-1){LP.unit++;LP.t=0;clearInterval(LP.timer);LP.timer=null;drawLesson()}else closeOverlay()">الوحدة التالية ←</button></div></div>
+ <style>@media(max-width:800px){#lgrid{grid-template-columns:1fr!important}}</style>`}
+function playLesson(){LP.timer=setInterval(()=>{LP.t=Math.min(100,LP.t+1);if(LP.t>=100){clearInterval(LP.timer);LP.timer=null;toast('🌟 أكملتِ الدرس! جربي التمرين السريع')}const ov=$('#overlay');if(!ov.classList.contains('on')){clearInterval(LP.timer);return}const i=ov.querySelector('.prog i');if(i)i.style.width=LP.t+'%';const c=ov.querySelector('.cap');const cap=LESSON.lines[Math.min(3,Math.floor(LP.t/25))];if(c)c.innerHTML=`<span class="en">${cap[0]}: ${cap[1]}</span>`},150);drawLesson()}
+function closeOverlay(){clearInterval(LP.timer);LP.timer=null;clearInterval(R.timer);const o=$('#overlay');o.classList.remove('on');o.innerHTML='';o.style=''}
+
+/* ============ LIVE ROOM ============ */
+let R={};
+function openRoom(mode,sid){const s=S.sessions.find(x=>x.id===sid)||S.sessions[0];
+ R={mode,s,mic:false,cam:mode==='teacher'?true:!S.user.camOff,hand:false,low:false,cc:true,tab:'chat',rec:mode==='teacher'?false:true,
+  people:[['نور',0],['رهف',1],['أمل',0],['ريم',0],['هالة',0],['بشرى',0],['دعاء',0],['إيمان',0]],
+  waiting:mode==='teacher'?['م. ع (مسجلة)','حساب غير مسجل في الفصل']:[],
+  chat:[['أ. أسماء القدسي','Welcome everyone! 🌸 Today: Greetings & Introductions',1],['نور','Good afternoon teacher!',0],['رهف','Hello 👋',0]],t:0,slide:0};
+ const o=$('#overlay');o.classList.add('on');drawRoom();
+ const auto=['I am from Ibb 😊','Nice to meet you!','How do I say "سعيدة بلقائكم"؟','Nice to meet you all ❤️'];let k=0;
+ R.timer=setInterval(()=>{if(!$('#overlay').classList.contains('on'))return clearInterval(R.timer);R.t++;R.people.forEach(p=>p[1]=Math.random()<.15?1:0);if(R.t%3===0&&k<auto.length){R.chat.push([R.people[k%R.people.length][0],auto[k],0]);k++}drawRoom()},2500)}
+const SLIDES=[`<h2 class="en" style="text-align:left">Greetings & Introductions</h2><div class="en" style="font-size:22px;line-height:2;text-align:left;direction:ltr">👋 <b>Hello!</b> / <b>Hi!</b><br>🌅 Good morning · Good afternoon · Good evening<br>🙋‍♀️ My name is <u>&nbsp;Sara&nbsp;</u>.<br>🏡 I am from <u>&nbsp;Taiz&nbsp;</u>.<br>🤝 Nice to meet you!</div>`,
+ `<h2 class="en" style="text-align:left">Practice with a partner 💬</h2><div class="en" style="font-size:20px;line-height:2;text-align:left;direction:ltr">A: Hello! What's your name?<br>B: My name is ___. And you?<br>A: I'm ___. Where are you from?<br>B: I'm from ___.<br>A & B: Nice to meet you!</div><p class="small muted">تمرين ثنائي في غرف جانبية لمدة 5 دقائق</p>`];
+function drawRoom(){const s=R.s,T=R.mode==='teacher',O=R.mode==='observer',name=T?'أ. أسماء القدسي':O?'المشرفة':S.user.display;
+ $('#overlay').innerHTML=`<div class="room"><div class="room-top"><img src="icon-w.png" style="height:28px"><b class="en">${s.title}</b><span class="chip live">مباشر · ${12+Math.floor(R.t*2.5/60)} د</span><span class="priv-pill">🔒 فصل نسائي مغلق</span>${R.rec?'<span class="priv-pill">⏺ مسجّل لطالبات الفصل فقط (48 ساعة)</span>':''}${O?'<span class="priv-pill" style="background:var(--pink);color:var(--maroon)">👁️ مراقبة مُعلنة — ظهر إشعار للمشاركات</span>':''}<span style="flex:1"></span><span class="small" style="opacity:.7">👥 ${R.people.length+1}</span></div>
+ <div class="room-body"><div class="stage"><div class="board">${R.mode!=='teacher'?`<div class="wm-overlay">${Array(24).fill(esc(name)+' · HIND').map(x=>`<span>${x}</span>`).join('')}</div>`:''}${R.low?'<div class="notice small" style="margin-bottom:10px">📶 وضع البيانات المنخفضة: يتم تحميل السبورة كصورة خفيفة والصوت فقط</div>':''}${SLIDES[R.slide]}${R.cc?`<div style="position:sticky;bottom:0;margin-top:20px;text-align:center"><span style="background:rgba(43,0,4,.85);color:#fff;padding:6px 14px;border-radius:10px;font-size:14px" class="en">Teacher: Now, say "Nice to meet you" together 🗣️</span></div>`:''}</div>
+ <div class="tiles"><div class="tile teacher ${R.t%2?'speak':''}"><div class="av" style="background:var(--maroon);color:#fff">أ</div><b>أ. أسماء</b><span class="mic">🎙️</span></div>${T||O?'':`<div class="tile ${R.mic?'speak':''}">${R.hand?'<span class="hand">✋</span>':''}<div class="av">${esc(name[0])}</div>أنتِ ${R.cam?'📷':''}<span class="mic">${R.mic?'🎙️':'🔇'}</span></div>`}${R.people.map(p=>`<div class="tile ${p[1]?'speak':''}">${p[0]==='رهف'&&R.t%4<2?'<span class="hand">✋</span>':''}<div class="av">${p[0][0]}</div>${p[0]}<span class="mic">${p[1]?'🎙️':'🔇'}</span></div>`).join('')}</div></div>
+ <div class="room-side"><div class="tabs">${[['chat','الدردشة'],['people','المشاركات'],['notes','ملاحظاتي']].concat(T?[['wait',`الانتظار (${R.waiting.length})`]]:[]).map(x=>`<button class="${R.tab===x[0]?'on':''}" onclick="R.tab='${x[0]}';drawRoom()">${x[1]}</button>`).join('')}</div>
+ ${R.tab==='chat'?`<div class="chat" id="chatbox">${R.chat.map(m=>`<div class="msg ${m[2]?'t':''}"><b>${esc(m[0])}</b><span dir="auto">${esc(m[1])}</span></div>`).join('')}</div><div style="padding:10px;display:flex;gap:6px"><input id="cm" class="inp" placeholder="اكتبي رسالة..." style="background:#3a0a0e;border-color:#4a1015;color:#fff" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-s btn-sm" onclick="sendChat()">إرسال</button></div><div class="small" style="padding:0 12px 10px;opacity:.6">الدردشة تُحفظ للفصل فقط وتراجعها المشرفة عند البلاغ</div>`:
+ R.tab==='people'?`<div class="chat"><div class="msg t"><b>المعلمة</b>أ. أسماء القدسي</div>${R.people.map(p=>`<div class="msg" style="display:flex;justify-content:space-between;align-items:center"><span>${p[0]}</span>${T?`<span><a style="cursor:pointer" onclick="toast('تم كتم ${p[0]}')">🔇</a> <a style="cursor:pointer" onclick="toast('تمت دعوة ${p[0]} للتحدث 🎙️')">🎙️</a></span>`:'<span style="opacity:.6">🔇</span>'}</div>`).join('')}</div>`:
+ R.tab==='wait'?`<div class="chat">${R.waiting.map((w,i)=>`<div class="msg"><b>${w.includes('غير')?'⚠️ غير مسجلة في هذا الفصل':'✓ موثّقة ومسجلة'}</b>${w}<div class="row" style="margin-top:6px"><button class="btn btn-s btn-sm" onclick="R.people.push(['م. ع',0]);R.waiting.splice(${i},1);toast('تم القبول');drawRoom()">قبول</button><button class="btn btn-d btn-sm" onclick="R.waiting.splice(${i},1);toast('تم الرفض وإبلاغ المشرفة');drawRoom()">رفض</button></div></div>`).join('')||'<p class="small" style="padding:10px;opacity:.7">لا أحد في الانتظار</p>'}</div>`:
+ `<div style="padding:12px;flex:1"><textarea class="inp" rows="10" style="background:#3a0a0e;border-color:#4a1015;color:#fff" placeholder="ملاحظات خاصة بك تُحفظ مع الدرس..."></textarea></div>`}</div></div>
+ <div class="room-ctrl">${O?`<button class="cbtn" onclick="toast('تم تسجيل ملاحظة جودة')"><span class="i">📝</span>ملاحظة جودة</button><button class="cbtn" onclick="modal('<h3>تقييم الدرس</h3><p class=muted>التفاعل ⭐⭐⭐⭐⭐ · إدارة الوقت ⭐⭐⭐⭐ · الالتزام بالمنهج ⭐⭐⭐⭐⭐</p><button class=\\'btn btn-p\\' onclick=closeModal()>حفظ</button>')"><span class="i">⭐</span>تقييم</button>`:`
+ <button class="cbtn ${R.mic?'on':''}" onclick="R.mic=!R.mic;drawRoom()"><span class="i">${R.mic?'🎙️':'🔇'}</span>${R.mic?'الميكروفون':'مكتوم'}</button>
+ <button class="cbtn ${R.cam?'on':''}" onclick="R.cam=!R.cam;if(R.cam&&!${T})toast('📷 الكاميرا تظهر للمعلمة وطالبات الفصل فقط');drawRoom()"><span class="i">📷</span>${R.cam?'الكاميرا تعمل':'الكاميرا مغلقة'}</button>
+ ${T?`<button class="cbtn" onclick="toast('تم كتم الجميع')"><span class="i">🔕</span>كتم الجميع</button><button class="cbtn" onclick="R.slide=(R.slide+1)%2;drawRoom()"><span class="i">🖼️</span>الشريحة التالية</button><button class="cbtn" onclick="toast('تم توزيع الطالبات على 4 غرف ثنائية لمدة 5 دقائق')"><span class="i">👭</span>غرف جانبية</button><button class="cbtn ${R.rec?'on':''}" onclick="R.rec=!R.rec;drawRoom()"><span class="i">⏺</span>${R.rec?'إيقاف التسجيل':'تسجيل'}</button><button class="cbtn" onclick="toast('📊 سؤال سريع أُرسل للطالبات')"><span class="i">📊</span>سؤال سريع</button>`:`
+ <button class="cbtn ${R.hand?'on':''}" onclick="R.hand=!R.hand;drawRoom()"><span class="i">✋</span>رفع اليد</button><button class="cbtn ${R.low?'on':''}" onclick="R.low=!R.low;drawRoom()"><span class="i">📶</span>بيانات منخفضة</button><button class="cbtn" onclick="toast('🚩 تم إرسال بلاغ سري للمشرفة')"><span class="i">🚩</span>بلاغ سري</button>`}
+ <button class="cbtn ${R.cc?'on':''}" onclick="R.cc=!R.cc;drawRoom()"><span class="i">💬</span>الترجمة النصية</button>`}
+ <button class="cbtn end" onclick="closeOverlay();toast('${T?'تم إنهاء الدرس — سُجّل الحضور تلقائياً (9/12)':'غادرتِ الدرس — التسجيل متاح لك 48 ساعة'}')"><span class="i">📞</span>${T?'إنهاء الدرس':'مغادرة'}</button></div></div>`;
+ const cb=$('#chatbox');if(cb)cb.scrollTop=cb.scrollHeight;
+ const cm=$('#cm');if(cm&&R._draft){cm.value=R._draft}
+}
+function sendChat(){const v=$('#cm').value.trim();if(!v)return;R.chat.push([R.mode==='teacher'?'أ. أسماء القدسي':S.user.display,v,R.mode==='teacher'?1:0]);R._draft='';drawRoom()}
+document.addEventListener('input',e=>{if(e.target.id==='cm')R._draft=e.target.value});
+
+/* ============ TEACHER ============ */
+V.teacher={
+dash(){const mine=S.sessions.filter(s=>s.teacher==='أ. أسماء القدسي');return `<div class="main-head"><div><h2>صباح الخير أ. أسماء 🌸</h2><p class="muted" style="margin:0">لديك ${mine.length} دروس هذا الأسبوع و${S.submissions.filter(s=>s.status==='new').length} واجبات بانتظار التصحيح.</p></div><button class="btn btn-p" onclick="openRoom('teacher',1)">🎥 ابدئي درس اليوم</button></div>
+ <div class="grid g4">${kpi('27','طالبة في فصولي')}${kpi('91%','متوسط الحضور','↑ 4% عن الشهر الماضي')}${kpi('4.9 ⭐','تقييم الطالبات')}${kpi('38 س','ساعات التدريس هذا الشهر')}</div>
+ <div class="grid g2" style="margin-top:16px"><div class="card"><h3>دروسي القادمة</h3>${mine.map(s=>`<div class="list-item"><div style="flex:1"><b class="en">${s.title}</b><div class="small muted">${s.day} ${s.time} · ${s.booked}/${s.seats}</div></div>${s.live?`<button class="btn btn-p btn-sm" onclick="openRoom('teacher',${s.id})">ابدئي</button>`:'<span class="chip">مجدول</span>'}</div>`).join('')}</div>
+ <div class="card"><h3>تحتاج انتباهك</h3><div class="list-item">✍️ <span style="flex:1">${S.submissions.filter(s=>s.status==='new').length} واجبات جديدة</span><button class="btn btn-g btn-sm" onclick="go('grading')">صحّحي</button></div><div class="list-item">⚠️ <span style="flex:1">ريم غابت عن درسين متتاليين</span><button class="btn btn-g btn-sm" onclick="toast('أُرسلت رسالة تشجيع لريم 🌸')">رسالة تشجيع</button></div><div class="list-item">🌱 <span style="flex:1">وحدة جديدة في أكاديمية المعلمات</span><button class="btn btn-g btn-sm" onclick="go('academy')">ابدئي</button></div></div></div>`},
+schedule(){const mine=S.sessions.filter(s=>s.teacher==='أ. أسماء القدسي');return `<div class="main-head"><h2>جدولي ودروسي</h2><button class="btn btn-p" onclick="newSession()">+ جدولة درس جديد</button></div>
+ <div class="card tbl"><table><tr><th>الدرس</th><th>المستوى</th><th>الموعد</th><th>المدة</th><th>الحجوزات</th><th></th></tr>${mine.map(s=>`<tr><td class="en"><b>${s.title}</b></td><td><span class="chip">${s.level}</span></td><td>${s.day} ${s.time}</td><td>${s.dur} د</td><td>${s.booked}/${s.seats}</td><td>${s.live?`<button class="btn btn-p btn-sm" onclick="openRoom('teacher',${s.id})">ابدئي</button>`:`<button class="btn btn-g btn-sm" onclick="toast('تم إرسال تذكير للطالبات')">تذكير</button>`}</td></tr>`).join('')}</table></div>
+ <div class="card" style="margin-top:16px"><h3>أوقات تفرغي الأسبوعية</h3><div class="grid g4">${['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'].map((d,i)=>`<label class="opt ${i%2?'':'on'}" style="margin:0"><input type="checkbox" ${i%2?'':'checked'}><div><b>${d}</b><div class="small muted">${i%2?'—':'4:00 – 8:00 م'}</div></div></label>`).join('')}</div></div>`},
+classes(){return `<div class="main-head"><div><h2>فصولي والطالبات</h2><p class="muted" style="margin:0">تظهر لكِ الأسماء الظاهرة فقط — لا أرقام ولا بيانات اتصال.</p></div><div class="tabs"><button class="on">A1 — مساء الأحد</button><button onclick="toast('فصل A1 — صباحي')">A1 صباحي</button><button onclick="toast('فصل A2')">A2</button></div></div>
+ <div class="card tbl"><table><tr><th>الطالبة</th><th>المستوى</th><th>الحضور</th><th>المحافظة</th><th>آخر نشاط</th><th></th></tr>${S.roster.map(r=>`<tr><td><div class="row"><div class="av" style="width:30px;height:30px;font-size:13px">${r[0][0]}</div><b>${r[0]}</b></div></td><td>${r[1]}</td><td style="width:160px">${bar(r[2],r[2]<75?'pink':'')}<span class="small muted">${r[2]}%</span></td><td>${r[3]}</td><td class="small muted">${r[2]<75?'قبل 5 أيام':'اليوم'}</td><td><button class="btn btn-g btn-sm" onclick="modal('<h3>ملاحظة عن ${r[0]}</h3><textarea class=inp rows=4 placeholder=\\'ملاحظة خاصة لا تراها الطالبة\\'></textarea><button class=\\'btn btn-p\\' style=margin-top:10px onclick=closeModal()>حفظ</button>')">ملاحظة</button></td></tr>`).join('')}</table></div>`},
+grading(){return `<div class="main-head"><h2>الواجبات والتقييم</h2><button class="btn btn-o btn-sm" onclick="modal('<h3>واجب جديد</h3><label class=f><span>العنوان</span><input class=inp></label><label class=f><span>النوع</span><select class=inp><option>تمرين تفاعلي</option><option>كتابة</option><option>تسجيل صوتي</option></select></label><button class=\\'btn btn-p\\' onclick=\\'closeModal();toast(&quot;تم نشر الواجب للفصل&quot;)\\'>نشر</button>')">+ واجب جديد</button></div>
+ ${S.submissions.map((s,i)=>`<div class="card" style="margin-bottom:12px"><div class="row between"><div class="row"><div class="av">${s.student[0]}</div><div><b>${s.student}</b><div class="small muted">${s.task}</div></div></div>${s.status==='graded'?`<span class="chip ok">مُقيَّم ${s.score||''}</span>`:'<span class="chip warn">جديد</span>'}</div>
+ <div class="en" style="background:var(--bg);border-radius:12px;padding:12px;margin:10px 0;direction:ltr;text-align:left">${esc(s.ans)}</div>
+ ${s.status!=='graded'?`<div class="row" style="flex-wrap:nowrap"><select class="inp" id="sc${i}" style="width:110px">${[10,9,8,7,6,5].map(n=>`<option>${n}/10</option>`).join('')}</select><input class="inp" id="fb${i}" placeholder="ملاحظتك للطالبة (مثال: ممتاز! انتبهي لـ I am studying)"><button class="btn btn-p" onclick="S.submissions[${i}].status='graded';S.submissions[${i}].score=$('#sc${i}').value;toast('✓ تم إرسال التقييم للطالبة');render()">إرسال</button></div>`:''}</div>`).join('')}`},
+content(){return `<div class="main-head"><div><h2>المحتوى التعليمي</h2><p class="muted" style="margin:0">كل مادة تُراجعها مشرفة أكاديمية قبل نشرها للطالبات.</p></div></div>
+ <div class="card" style="margin-bottom:16px"><h3>رفع مادة جديدة</h3><div class="grid g3"><label class="f"><span>العنوان</span><input id="mt" class="inp" placeholder="Unit 4 — At the Clinic"></label><label class="f"><span>النوع</span><select id="mty" class="inp"><option>عرض تقديمي</option><option>فيديو قصير</option><option>صوت</option><option>ورقة عمل</option><option>بطاقات مفردات</option></select></label><label class="f"><span>الملف</span><input type="file" class="inp"></label></div><button class="btn btn-p" onclick="S.materials.unshift({title:$('#mt').value||'مادة جديدة',type:$('#mty').value,by:'أ. أسماء القدسي',status:'review'});toast('✓ أُرسلت للمراجعة');render()">رفع وإرسال للمراجعة</button></div>
+ <div class="card tbl"><table><tr><th>المادة</th><th>النوع</th><th>بواسطة</th><th>الحالة</th></tr>${S.materials.map(m=>`<tr><td class="en"><b>${esc(m.title)}</b></td><td>${m.type}</td><td>${m.by}</td><td>${m.status==='approved'?'<span class="chip ok">منشورة</span>':m.status==='rejected'?'<span class="chip bad">تحتاج تعديل</span>':'<span class="chip warn">قيد المراجعة</span>'}</td></tr>`).join('')}</table></div>`},
+academy(){return `<div class="main-head"><div><h2>أكاديمية المعلمات 🌱</h2><p class="muted" style="margin:0">برنامج تأهيل لـ50 معلمة يمنية — شهادة "معلمة هند المعتمدة".</p></div></div><div class="grid g2">${[['أساليب التدريس التواصلي','100'],['إدارة الفصل الافتراضي والتفاعل','100'],['التدريس المراعي للسياق الثقافي','70'],['أدوات منصة هند','100'],['تقييم المهارات الأربع','30'],['دعم الطالبات نفسياً وتحفيزهن','0']].map(m=>`<div class="card"><div class="row between"><h4 style="margin:0">${m[0]}</h4>${m[1]==='100'?'<span class="chip ok">مكتمل</span>':m[1]==='0'?'<span class="chip">جديد</span>':'<span class="chip warn">جارٍ</span>'}</div><div style="margin:10px 0">${bar(+m[1])}</div><button class="btn btn-g btn-sm" onclick="toast('فتح الوحدة التدريبية')">${m[1]==='100'?'مراجعة':'متابعة'}</button></div>`).join('')}</div>
+ <div class="card" style="margin-top:16px"><h3>مجتمع المعلمات</h3><p class="muted small">مساحة لتبادل الخبرات والتحديات والأفكار بين معلمات هند — مع لقاء شهري مع المشرفة الأكاديمية.</p><button class="btn btn-o btn-sm" onclick="toast('فتح مجتمع المعلمات')">دخول المجتمع</button></div>`},
+profile(){return `<div class="main-head"><h2>ملفي المهني</h2></div><div class="card" style="max-width:720px"><div class="row"><div class="av lg">أ</div><div><h3 style="margin:0">أ. أسماء القدسي</h3><span class="small muted">معلمة معتمدة · منذ يونيو 2026 · صنعاء</span></div></div><div class="sep"></div>
+ <label class="f"><span>نبذة تظهر للطالبات</span><textarea class="inp" rows="3">معلمة لغة إنجليزية بخبرة 6 سنوات، أحب تعليم المحادثة بطريقة مرحة وقريبة من حياتنا اليومية.</textarea></label>
+ <div class="grid g2"><label class="f"><span>المؤهل</span><input class="inp" value="بكالوريوس لغة إنجليزية — جامعة صنعاء"></label><label class="f"><span>مستوى اللغة</span><input class="inp" value="C1"></label></div>
+ <div class="row"><span class="chip ok">✓ موثّقة</span><span class="chip">🏅 أكاديمية هند: 4/6</span><span class="chip">⭐ 4.9 من 86 تقييماً</span></div><button class="btn btn-p" style="margin-top:14px" onclick="toast('تم الحفظ')">حفظ</button></div>`}
+};
+function newSession(){modal(`<h3>جدولة درس جديد</h3><label class="f"><span>عنوان الدرس</span><input id="ns-t" class="inp en" value="At the Clinic — مفردات العيادة"></label>
+ <div class="grid g2"><label class="f"><span>المستوى</span><select id="ns-l" class="inp"><option>A0</option><option selected>A1</option><option>A2</option><option>B1</option></select></label><label class="f"><span>اليوم</span><select id="ns-d" class="inp"><option>الخميس</option><option>السبت</option><option>الأحد</option></select></label>
+ <label class="f"><span>الوقت</span><input id="ns-h" class="inp" value="5:00 م"></label><label class="f"><span>عدد المقاعد</span><input id="ns-s" class="inp" type="number" value="12" max="12"></label></div>
+ <label class="opt on"><input type="checkbox" checked><div><b>تسجيل الدرس لطالبات الفصل</b><div class="small muted">يُحذف التسجيل تلقائياً بعد 48 ساعة</div></div></label>
+ <label class="opt on"><input type="checkbox" checked><div><b>غرفة انتظار</b><div class="small muted">لا تدخل إلا الطالبات المسجلات في الدرس</div></div></label>
+ <button class="btn btn-p" onclick="addSession()">إنشاء الدرس ونشره للطالبات</button>`)}
+function addSession(){S.sessions.push({id:Date.now(),title:$('#ns-t').value,level:$('#ns-l').value,teacher:'أ. أسماء القدسي',day:$('#ns-d').value,time:$('#ns-h').value,dur:45,seats:Math.min(12,+$('#ns-s').value||12),booked:0});closeModal();toast('✓ تم نشر الدرس — يظهر الآن في جدول الطالبات');render()}
+
+/* ============ GUARDIAN ============ */
+V.guardian={
+dash(){if(!S.guardianOn)return `<div class="card" style="max-width:560px;margin:40px auto;text-align:center"><div style="font-size:40px">🔒</div><h3>المتابعة غير مفعلة</h3><p class="muted">أوقفت الطالبة مشاركة تقدمها. يمكنها إعادة تفعيلها من إعدادات الخصوصية.</p><button class="btn btn-o" onclick="setRole('student','privacy')">الذهاب لإعدادات الطالبة</button></div>`;
+ return `<div class="main-head"><div><h2>متابعة تقدم ${esc(S.user.display)}</h2><p class="muted" style="margin:0">مرتبط بإذن الطالبة · آخر تحديث اليوم</p></div><span class="chip ok">✓ بيئة نسائية موثّقة</span></div>
+ <div class="grid g4">${kpi('A1','المستوى الحالي','بدأت من A0')}${kpi('93%','نسبة الحضور')}${kpi('42%','إنجاز المستوى')}${kpi('9 أيام','تعلم متواصل')}</div>
+ <div class="grid g2" style="margin-top:16px"><div class="card"><h3>التقدم الأسبوعي</h3><div class="chartbars">${[20,28,25,34,40,38,42].map((v,i)=>`<div class="b"><i style="height:${v*3.5}px"></i><span>أ${i+1}</span></div>`).join('')}</div></div>
+ <div class="card"><h3>ملاحظات المعلمة</h3><div class="list-item">🌸 <span>"سارة متفاعلة جداً ونطقها يتحسن بشكل ملحوظ" — أ. أسماء القدسي</span></div><div class="list-item">🏅 <span>حصلت على شهادة المستوى التمهيدي</span></div><div class="list-item">✅ <span>سلّمت 9 من 10 واجبات</span></div></div></div>
+ <div class="notice" style="margin-top:16px">🔒 <div class="small">كولي أمر ترى التقدم والحضور والمواعيد فقط. محتوى الدروس والدردشة والتسجيلات خاص بالطالبات والمعلمة حمايةً لخصوصية جميع المشاركات.</div></div>`},
+attend(){return `<div class="main-head"><h2>الحضور والمواعيد</h2></div><div class="grid g2"><div class="card"><h3>المواعيد القادمة</h3>${S.sessions.filter(s=>s.mine).map(s=>`<div class="list-item"><div style="flex:1"><b class="en">${s.title}</b><div class="small muted">${s.day} ${s.time} · ${s.teacher}</div></div><span class="chip">${s.dur} د</span></div>`).join('')}</div>
+ <div class="card"><h3>سجل الحضور</h3><table><tr><th>التاريخ</th><th>الدرس</th><th>الحالة</th></tr>${[['10 نوفمبر','My Day','ok'],['8 نوفمبر','Numbers & Prices','ok'],['5 نوفمبر','At the Market','ok'],['3 نوفمبر','Family words','late'],['1 نوفمبر','Colors','ok']].map(r=>`<tr><td>${r[0]}</td><td class="en">${r[1]}</td><td>${r[2]==='ok'?'<span class="chip ok">حضرت</span>':'<span class="chip warn">حضرت متأخرة</span>'}</td></tr>`).join('')}</table></div></div>`},
+gset(){return `<div class="main-head"><h2>الإعدادات والموافقة</h2></div><div class="card" style="max-width:640px"><h3>موافقة ولي الأمر</h3><p class="muted small">للطالبات أقل من 18 سنة، تُعد موافقتك شرطاً للتسجيل.</p><div class="list-item"><div style="flex:1"><b>أوافق على تسجيل ابنتي في منصة هند</b><div class="small muted">بيئة نسائية بالكامل ومعلمات موثّقات</div></div>${sw(true,"toast('تم الحفظ')")}</div><div class="list-item"><div style="flex:1"><b>تقرير أسبوعي عبر الرسائل النصية</b></div>${sw(true,"toast('تم الحفظ')")}</div><div class="list-item"><div style="flex:1"><b>تنبيه عند الغياب</b></div>${sw(true,"toast('تم الحفظ')")}</div>
+ <div class="sep"></div><label class="f"><span>ربط طالبة أخرى (كود الدعوة)</span><div class="row" style="flex-wrap:nowrap"><input class="inp en" placeholder="HG-XXXX-XXXX"><button class="btn btn-s" onclick="toast('سيُرسل طلب ربط للطالبة للموافقة')">ربط</button></div></label></div>`}
+};
+
+/* ============ SUPERVISOR ============ */
+V.supervisor={
+dash(){const open=S.reports.filter(r=>r.status==='open').length;return `<div class="main-head"><h2>لوحة الإشراف</h2></div><div class="grid g4">${kpi('3','دروس مباشرة الآن')}${kpi(open,'بلاغات مفتوحة',open?'⚠️ واحد عالي الخطورة':'')}${kpi(S.materials.filter(m=>m.status==='review').length,'مواد بانتظار المراجعة')}${kpi('4.8','متوسط جودة الدروس')}</div>
+ <div class="grid g2" style="margin-top:16px"><div class="card"><h3>أحدث البلاغات</h3>${S.reports.filter(r=>r.status==='open').slice(0,3).map(r=>`<div class="list-item"><span class="chip ${r.sev==='عالية'?'bad':r.sev==='متوسطة'?'warn':''}">${r.sev}</span><span style="flex:1" class="small">${r.what}</span></div>`).join('')}<button class="btn btn-o btn-sm" style="margin-top:8px" onclick="go('reports')">كل البلاغات</button></div>
+ <div class="card"><h3>ميثاق الإشراف</h3><ul class="small muted" style="padding-right:18px;margin:0"><li>المشرفات نساء موثّقات فقط.</li><li>الدخول للدروس يكون مُعلناً دائماً ويظهر للمشاركات.</li><li>لا يُطّلع على الدردشة إلا عند وجود بلاغ.</li><li>كل إجراء يُسجّل في سجل التدقيق.</li></ul></div></div>`},
+monitor(){return `<div class="main-head"><h2>الدروس الجارية الآن</h2></div><div class="grid g3">${[[S.sessions[0],'أ. أسماء القدسي',9],[{id:7,title:'Phone Calls — A2',level:'A2'},'أ. فاطمة الأهدل',11],[{id:8,title:'Presentations — B1',level:'B1'},'أ. منى الحكيمي',7]].map(([s,t,n])=>`<div class="card"><span class="chip live">مباشر</span><h4 class="en" style="margin-top:10px">${s.title}</h4><div class="small muted">${t} · ${n} طالبات</div><div class="row" style="margin-top:10px"><span class="small">صحة الاتصال</span>${bar(85)}</div><button class="btn btn-o btn-sm" style="margin-top:12px" onclick="openRoom('observer',1)">👁️ دخول مُعلن للمراقبة</button></div>`).join('')}</div>`},
+reports(){return `<div class="main-head"><div><h2>البلاغات</h2><p class="muted" style="margin:0">تُعالج البلاغات عالية الخطورة خلال ساعة.</p></div></div><div class="card tbl"><table><tr><th>البلاغ</th><th>المكان</th><th>المُبلِغة</th><th>الخطورة</th><th>الحالة</th><th></th></tr>${S.reports.map((r,i)=>`<tr><td>${r.what}</td><td class="small">${r.where}</td><td class="small muted">${r.by}</td><td><span class="chip ${r.sev==='عالية'?'bad':r.sev==='متوسطة'?'warn':''}">${r.sev}</span></td><td>${r.status==='open'?'<span class="chip warn">مفتوح</span>':`<span class="chip ok">${r.action||'مغلق'}</span>`}</td><td>${r.status==='open'?`<button class="btn btn-p btn-sm" onclick="handleReport(${i})">معالجة</button>`:''}</td></tr>`).join('')}</table></div>`},
+review(){return `<div class="main-head"><h2>مراجعة المحتوى</h2></div>${S.materials.map((m,i)=>`<div class="card" style="margin-bottom:12px"><div class="row between"><div><b class="en">${esc(m.title)}</b><div class="small muted">${m.type} · ${m.by}</div></div>${m.status==='review'?`<div class="row"><button class="btn btn-p btn-sm" onclick="S.materials[${i}].status='approved';toast('✓ اعتُمدت ونُشرت للطالبات');render()">اعتماد ونشر</button><button class="btn btn-d btn-sm" onclick="S.materials[${i}].status='rejected';toast('أُعيدت للمعلمة مع ملاحظات');render()">طلب تعديل</button></div>`:m.status==='approved'?'<span class="chip ok">منشورة</span>':'<span class="chip bad">تحتاج تعديل</span>'}</div>${m.status==='review'?`<div class="notice small" style="margin-top:10px">✓ معايير المراجعة: دقة لغوية · مناسبة ثقافياً · صور لائقة · ملكية فكرية · مستوى مناسب</div>`:''}</div>`).join('')}`},
+quality(){return `<div class="main-head"><h2>جودة التعليم</h2></div><div class="card tbl"><table><tr><th>المعلمة</th><th>تقييم الطالبات</th><th>الحضور</th><th>زيارات المراقبة</th><th>آخر ملاحظة</th></tr>${[['أ. أسماء القدسي',4.9,91,3,'تفاعل ممتاز'],['أ. منى الحكيمي',4.7,86,2,'تأخر مرة واحدة'],['أ. رنا العبسي',4.8,94,2,'عيادة النطق متميزة'],['أ. فاطمة الأهدل',4.6,88,1,'تحتاج غرف جانبية أكثر']].map(t=>`<tr><td><b>${t[0]}</b></td><td>⭐ ${t[1]}</td><td style="width:150px">${bar(t[2])}<span class="small muted">${t[2]}%</span></td><td>${t[3]}</td><td class="small muted">${t[4]}</td></tr>`).join('')}</table></div>`}
+};
+function handleReport(i){const r=S.reports[i];modal(`<h3>معالجة البلاغ</h3><p>${r.what}</p><p class="small muted">${r.where} · ${r.by}</p>${['تعليق الحساب مؤقتاً وإعادة التحقق','إنذار رسمي','حذف المحتوى','تواصل مع المعلمة','إغلاق — لا يوجد مخالفة'].map((a,j)=>`<label class="opt"><input type="radio" name="ha" value="${a}" ${j===0?'checked':''}><span>${a}</span></label>`).join('')}<label class="f"><span>ملاحظة للسجل</span><textarea class="inp" rows="2"></textarea></label><button class="btn btn-p" onclick="S.reports[${i}].status='closed';S.reports[${i}].action=document.querySelector('input[name=ha]:checked').value;closeModal();toast('✓ تم تنفيذ الإجراء وإشعار المُبلِغة');render()">تنفيذ</button>`)}
+
+/* ============ ADMIN ============ */
+V.admin={
+dash(){return `<div class="main-head"><div><h2>نظرة عامة</h2><p class="muted" style="margin:0">السنة الأولى · ${S.freePhase?'🎁 مرحلة الإطلاق المجانية مفعّلة':'المرحلة المدفوعة'}</p></div><div class="tabs"><button class="on">هذا الشهر</button><button onclick="toast('عرض الربع')">الربع</button><button onclick="toast('عرض السنة')">السنة</button></div></div>
+ <div class="grid g4">${kpi('312 / 500','الطالبات المسجلات','62% من هدف السنة')}${kpi('34 / 50','المعلمات المؤهلات','68% من الهدف')}${kpi('186','درساً مباشراً هذا الشهر','↑ 22%')}${kpi('82%','متوسط الحضور')}</div>
+ <div class="grid g2" style="margin-top:16px"><div class="card"><h3>التسجيلات الشهرية</h3><div class="chartbars">${[['يون',38],['يول',52],['أغس',61],['سبت',48],['أكت',57],['نوف',56]].map(m=>`<div class="b"><span>${m[1]}</span><i style="height:${m[1]*2.2}px"></i><span>${m[0]}</span></div>`).join('')}</div></div>
+ <div class="card"><h3>التوزيع حسب المحافظة</h3>${[['صنعاء',28],['تعز',19],['عدن',16],['إب',12],['حضرموت',9],['الحديدة',8],['أخرى',8]].map(g=>`<div class="row" style="flex-wrap:nowrap;margin:6px 0"><span style="width:70px" class="small">${g[0]}</span><div style="flex:1">${bar(g[1]*3)}</div><span class="small muted" style="width:36px">${g[1]}%</span></div>`).join('')}</div></div>
+ <div class="grid g3" style="margin-top:16px">${kpi('+38%','متوسط التحسن (قبلي ← بعدي)')}${kpi('4.7 / 5','رضا الطالبات')}${kpi(S.codes.reduce((a,c)=>a+c.used,0),'استخدامات أكواد الخصم')}</div>`},
+users(){return `<div class="main-head"><h2>المستخدمات</h2><div class="row"><input class="inp" placeholder="بحث بالاسم..." style="width:200px" oninput="document.querySelectorAll('#ut tr[data-n]').forEach(r=>r.style.display=r.dataset.n.includes(this.value)?'':'none')"><button class="btn btn-p btn-sm" onclick="modal('<h3>دعوة مستخدمة</h3><label class=f><span>الدور</span><select class=inp><option>طالبة</option><option>معلمة</option><option>مشرفة</option></select></label><label class=f><span>الجوال أو البريد</span><input class=inp dir=ltr></label><button class=\\'btn btn-p\\' onclick=\\'closeModal();toast(&quot;أُرسلت الدعوة&quot;)\\'>إرسال</button>')">+ دعوة</button></div></div>
+ <div class="card tbl"><table id="ut"><tr><th>الاسم الظاهر</th><th>الدور</th><th>المستوى</th><th>المحافظة</th><th>الحالة</th><th>الكود</th><th></th></tr>${S.users.map((u,i)=>`<tr data-n="${esc(u[0])}"><td><b>${esc(u[0])}</b></td><td>${u[1]}</td><td>${u[2]}</td><td>${u[3]}</td><td><span class="chip ${u[4]==='نشطة'?'ok':u[4].includes('موقوفة')?'bad':'warn'}">${u[4]}</span></td><td class="en small">${u[5]}</td><td>${u[4].includes('بانتظار')?`<button class="btn btn-p btn-sm" onclick="S.users[${i}][4]='نشطة';toast('✓ تم التحقق والتفعيل');render()">تحقق</button>`:`<button class="btn btn-g btn-sm" onclick="toast('سجل النشاط')">السجل</button>`}</td></tr>`).join('')}</table></div>`},
+apps(){return `<div class="main-head"><div><h2>طلبات المعلمات</h2><p class="muted" style="margin:0">الطلب ← اختبار اللغة ← مقابلة ← أكاديمية المعلمات ← درس تجريبي ← اعتماد</p></div><button class="btn btn-o btn-sm" onclick="setRole('public','teach')">صفحة التقديم العامة</button></div>
+ <div class="grid g2">${S.teacherApps.map((a,i)=>{const stages=['جديد','مقابلة','تدريب','معتمدة'];const si=stages.indexOf(a.stage);return `<div class="card"><div class="row between"><div class="row"><div class="av">${a.name[0]}</div><div><b>${a.name}</b><div class="small muted">${a.qual}</div></div></div><span class="chip">${a.stage}</span></div><div class="small muted" style="margin:8px 0">الخبرة: ${a.exp} · مستوى اللغة: ${a.test}</div><div class="row" style="gap:4px">${stages.map((s,j)=>`<div style="flex:1;height:6px;border-radius:9px;background:${j<=si?'var(--maroon)':'var(--line)'}"></div>`).join('')}</div><div class="row" style="margin-top:12px">${si<3?`<button class="btn btn-p btn-sm" onclick="S.teacherApps[${i}].stage='${stages[Math.min(3,si+1)]}';toast('نُقلت إلى: ${stages[Math.min(3,si+1)]}');render()">نقل إلى: ${stages[si+1]}</button><button class="btn btn-d btn-sm" onclick="S.teacherApps.splice(${i},1);toast('تم الاعتذار للمتقدمة برسالة لطيفة');render()">اعتذار</button>`:'<span class="chip ok">✓ أُضيفت لفريق المعلمات</span>'}</div></div>`}).join('')}</div>`},
+codes(){return `<div class="main-head"><div><h2>أكواد الخصم</h2><p class="muted" style="margin:0">أداة مرحلة الإطلاق: كود مجاني مباشر، وأكواد للشركاء والمنح.</p></div><button class="btn btn-p" onclick="newCode()">+ إنشاء كود</button></div>
+ <div class="card tbl"><table><tr><th>الكود</th><th>الخصم</th><th>الاستخدام</th><th>صالح حتى</th><th>الوصف</th><th>فعّال</th><th></th></tr>${S.codes.map((c,i)=>`<tr><td><b class="en" style="color:var(--maroon)">${c.code}</b></td><td>${c.pct}%</td><td style="width:150px">${bar(c.used/c.limit*100,'pink')}<span class="small muted">${c.used} / ${c.limit}</span></td><td>${c.until}</td><td class="small">${c.note}</td><td>${sw(c.active,`S.codes[${i}].active=this.checked;toast(this.checked?'تم التفعيل':'تم الإيقاف')`)}</td><td><button class="btn btn-g btn-sm" onclick="copyText('${c.code}')">نسخ</button></td></tr>`).join('')}</table></div>
+ <div class="notice" style="margin-top:16px">💡 <div class="small">جرّبي: أوقفي الكود HIND100 ثم سجّلي طالبة جديدة من الموقع العام — سيظهر "الكود غير صالح".</div></div>`},
+plans(){return `<div class="main-head"><h2>الخطط ومرحلة المجانية</h2></div>
+ <div class="card" style="margin-bottom:16px;${S.freePhase?'border:2px solid var(--maroon)':''}"><div class="row between"><div><h3 style="margin:0">🎁 مرحلة الإطلاق المجانية</h3><p class="small muted" style="margin:4px 0 0">عند التفعيل: تظهر كل الخطط بسعر 0$ في الموقع العام، ويُقترح الكود HIND100 تلقائياً.</p></div>${sw(S.freePhase,"S.freePhase=this.checked;toast(this.checked?'مرحلة المجانية مفعّلة':'تم إيقاف مرحلة المجانية — شاهدي الموقع العام');render()")}</div>
+ <div class="grid g2" style="margin-top:12px"><label class="f"><span>تنتهي في</span><input class="inp" value="${S.freeUntil}" onchange="S.freeUntil=this.value"></label><label class="f"><span>إشعار الطالبات قبل الانتهاء</span><select class="inp"><option>30 يوماً</option><option>14 يوماً</option></select></label></div>
+ <button class="btn btn-o btn-sm" onclick="setRole('public','home');setTimeout(()=>goHome('pricing'),50)">معاينة صفحة الأسعار ←</button></div>
+ <div class="grid g3">${S.plans.map((p,i)=>`<div class="card"><h3>${p.name}</h3><label class="f"><span>السعر الشهري ($)</span><input class="inp" type="number" value="${p.price}" onchange="S.plans[${i}].price=+this.value;toast('تم تحديث السعر')"></label><ul class="small" style="padding-right:18px">${p.feats.map(f=>`<li>${f}</li>`).join('')}</ul></div>`).join('')}</div>
+ <div class="card" style="margin-top:16px"><h3>نموذج الاستدامة المقترح (بعد الإطلاق)</h3><div class="grid g4">${[['الأساسية','مجانية دائماً — لضمان الوصول'],['المميزة / المهنية','رسوم رمزية للقادرات'],['المقاعد المرعية','شركاء يرعون منحاً كاملة'],['الخدمات المؤسسية','تدريب موظفات المنظمات والشركات']].map(x=>`<div class="notice" style="display:block"><b>${x[0]}</b><div class="small muted">${x[1]}</div></div>`).join('')}</div></div>`},
+impact(){return `<div class="main-head"><div><h2>تقارير الأثر</h2><p class="muted" style="margin:0">قياس دوري وفق خطة المبادرة: اختبارات قبلية/بعدية، رضا، دراسات حالة.</p></div><button class="btn btn-o btn-sm" onclick="copyText('تقرير هند — نوفمبر 2026: 312 طالبة، 34 معلمة، 186 درساً، حضور 82%، تحسن +38%، رضا 4.7/5')">نسخ ملخص التقرير</button></div>
+ <div class="grid g2"><div class="card"><h3>متوسط الدرجات قبلي ← بعدي</h3><div class="chartbars" style="height:200px">${[['A0',32,71],['A1',45,74],['A2',52,78],['B1',58,80]].map(l=>`<div class="b"><div style="display:flex;gap:4px;align-items:flex-end;width:100%;justify-content:center;height:100%"><i class="t" style="height:${l[1]*1.8}px;max-width:22px"></i><i style="height:${l[2]*1.8}px;max-width:22px"></i></div><span>${l[0]}</span></div>`).join('')}</div><div class="row small"><span><i style="display:inline-block;width:10px;height:10px;background:var(--pink);border-radius:3px"></i> قبلي</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--maroon);border-radius:3px"></i> بعدي</span></div></div>
+ <div class="card"><h3>نتائج استبيانات الرضا</h3>${[['الشعور بالأمان والخصوصية',96],['جودة المعلمات',94],['مناسبة المحتوى لحياتي',89],['سهولة استخدام المنصة',87],['جودة الاتصال',71]].map(x=>`<div style="margin:8px 0"><div class="row between small"><span>${x[0]}</span><b>${x[1]}%</b></div>${bar(x[1])}</div>`).join('')}</div></div>
+ <div class="card" style="margin-top:16px"><h3>مؤشرات التمكين (استبيان 3 أشهر)</h3><div class="grid g4">${kpi('71%','زادت ثقتهن بأنفسهن')}${kpi('23%','تقدمن لعمل أو دراسة')}${kpi('48%','يساعدن أطفالهن في واجبات الإنجليزية')}${kpi('12','دراسة حالة موثقة')}</div></div>`},
+partners(){return `<div class="main-head"><h2>الشركاء والرعاة</h2><button class="btn btn-p btn-sm" onclick="toast('نموذج إضافة شريك')">+ شريك</button></div><div class="card tbl"><table><tr><th>الشريك</th><th>النوع</th><th>المقاعد المرعية</th><th>الكود</th><th>الحالة</th></tr>${[['شريك (أ) — منظمة تنموية','داعم مالي',150,'PARTNER-A','نشط'],['جمعية نسائية محلية (ب)','شريك مجتمعي — إحالة طالبات','—','INVITE-B','نشط'],['جامعة (ج)','شريك أكاديمي — تدريب المعلمات','—','—','قيد التوقيع'],['شركة تقنية (د)','دعم تقني وباقات بيانات',50,'PARTNER-D','مفاوضات']].map(p=>`<tr><td><b>${p[0]}</b></td><td class="small">${p[1]}</td><td>${p[2]}</td><td class="en small">${p[3]}</td><td><span class="chip ${p[4]==='نشط'?'ok':'warn'}">${p[4]}</span></td></tr>`).join('')}</table></div>`},
+settings(){const r=(t,d,on)=>`<div class="list-item"><div style="flex:1"><b>${t}</b><div class="small muted">${d}</div></div>${sw(on,"toast('تم الحفظ')")}</div>`;return `<div class="main-head"><h2>إعدادات المنصة</h2></div><div class="grid g2"><div class="card"><h3>الأمان والخصوصية</h3>${r('التحقق النسائي إلزامي قبل الدروس المباشرة','',true)}${r('الكاميرا مغلقة افتراضياً للطالبات','',true)}${r('العلامة المائية باسم الطالبة','',true)}${r('حظر الأرقام والروابط في المجتمع','رقابة آلية + مراجعة بشرية',true)}${r('حذف وثائق الهوية بعد التحقق','',true)}${r('المصادقة الثنائية للمعلمات والإدارة','',true)}</div>
+ <div class="card"><h3>إعدادات تعليمية</h3><label class="f"><span>الحد الأقصى لطالبات الفصل</span><input class="inp" type="number" value="12"></label><label class="f"><span>مدة الاحتفاظ بالتسجيلات (ساعة)</span><input class="inp" type="number" value="48"></label><label class="f"><span>نسبة الحضور المطلوبة للشهادة</span><input class="inp" value="80%"></label><label class="f"><span>لغة الواجهة</span><select class="inp"><option>العربية</option><option>English</option></select></label><button class="btn btn-p" onclick="toast('تم الحفظ')">حفظ</button></div></div>`}
+};
+function newCode(){modal(`<h3>إنشاء كود خصم</h3><div class="grid g2"><label class="f"><span>الكود</span><input id="nc-c" class="inp en" value="PARTNER-E" style="text-transform:uppercase"></label><label class="f"><span>نسبة الخصم %</span><input id="nc-p" class="inp" type="number" value="100"></label><label class="f"><span>حد الاستخدام</span><input id="nc-l" class="inp" type="number" value="100"></label><label class="f"><span>صالح حتى</span><input id="nc-u" class="inp" value="30/06/2027"></label></div><label class="f"><span>الوصف</span><input id="nc-n" class="inp" value="مقاعد مرعية من شريك جديد"></label><label class="f"><span>يطبق على</span><select class="inp"><option>كل الخطط</option><option>المميزة فقط</option><option>المهنية فقط</option></select></label><button class="btn btn-p" onclick="S.codes.unshift({code:$('#nc-c').value.trim().toUpperCase(),pct:+$('#nc-p').value,used:0,limit:+$('#nc-l').value,until:$('#nc-u').value,note:$('#nc-n').value,active:true});closeModal();toast('✓ تم إنشاء الكود');render()">إنشاء</button>`)}
+
+/* ============ PARTNER ============ */
+V.partner={
+dash(){return `<div class="main-head"><div><h2>لوحة الأثر</h2><p class="muted" style="margin:0">بيانات مجمعة ومجهولة الهوية — لا تُعرض أي بيانات شخصية للطالبات.</p></div><span class="chip pink">تحديث شهري</span></div>
+ <div class="grid g3">${[['الطالبات المسجلات',312,500],['المعلمات المؤهلات',34,50],['الشهادات الصادرة',118,400]].map(x=>`<div class="card"><div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]} <span class="small muted">/ ${x[2]}</span></div></div>${bar(x[1]/x[2]*100)}<span class="small muted">${Math.round(x[1]/x[2]*100)}% من هدف السنة الأولى</span></div>`).join('')}</div>
+ <div class="grid g4" style="margin-top:16px">${kpi('+38%','تحسن متوسط في الاختبارات')}${kpi('96%','يشعرن بالأمان')}${kpi('19','محافظة يمنية')}${kpi('2,140','ساعة تعليم مباشر')}</div>
+ <div class="grid g2" style="margin-top:16px"><div class="card"><h3>من قصص الطالبات (دراسة حالة — بموافقة وباسم مستعار)</h3><p class="muted">"م" من حضرموت، أم لثلاثة أطفال، بدأت من المستوى التمهيدي. بعد 4 أشهر أصبحت تساعد أطفالها في واجبات الإنجليزية، وتقدمت لوظيفة إدخال بيانات تتطلب إنجليزية أساسية.</p></div>
+ <div class="card"><h3>خطة الاستثمار والاستدامة</h3><div class="list-item">1️⃣ <span><b>الآن:</b> مجاني بالكامل + كود HIND100 لبناء الثقة والقاعدة</span></div><div class="list-item">2️⃣ <span><b>بعد 6-9 أشهر:</b> خطط مدفوعة رمزية + منح للمحتاجات</span></div><div class="list-item">3️⃣ <span><b>التوسع:</b> خدمات مؤسسية، مسارات مهنية، ومستويات متقدمة</span></div><button class="btn btn-p btn-sm" style="margin-top:10px" onclick="go('sponsor')">ارعَ مقاعد دراسية</button></div></div>`},
+sponsor(){const n=S.sponsor.seats,cost=n*15;return `<div class="main-head"><h2>رعاية المقاعد الدراسية</h2></div><div class="grid g2"><div class="card"><h3>احسب أثر دعمك</h3><label class="f"><span>عدد المقاعد (طالبة لفصل دراسي كامل — 3 أشهر)</span><input type="range" min="5" max="200" step="5" value="${n}" style="width:100%;accent-color:var(--maroon)" oninput="S.sponsor.seats=+this.value;render()"></label>
+ <div style="font-size:40px;font-weight:700;color:var(--maroon)">${n} طالبة</div><div class="sep"></div><div class="row between"><span>التكلفة التقديرية</span><b style="font-size:22px">${cost.toLocaleString('en')}$</b></div><p class="small muted">≈ 15$ للطالبة/الفصل: حصة المعلمة، المنصة، الإشراف، وباقة بيانات.</p>
+ <button class="btn btn-p" onclick="modal('<h3>شكراً لاهتمامكم 🤍</h3><p class=muted>هذا نموذج عرض: في النسخة الفعلية يُنشأ كود رعاية خاص بكم (مثل PARTNER-X) ويتواصل معكم فريق الشراكات لتوقيع الاتفاقية واستلام التقارير.</p><button class=\\'btn btn-p\\' onclick=closeModal()>حسناً</button>')">طلب رعاية ${n} مقعد</button></div>
+ <div class="card"><h3>ماذا يحصل الشريك؟</h3><div class="list-item">🏷️ كود خاص لتتبع المقاعد المرعية</div><div class="list-item">📈 لوحة أثر مباشرة وتقارير ربع سنوية</div><div class="list-item">📖 دراسات حالة موثقة (بموافقة الطالبات)</div><div class="list-item">🤝 ظهور الشعار في صفحة الشركاء وفق دليل الهوية</div></div></div>`},
+preports(){return `<div class="main-head"><h2>التقارير الدورية</h2></div><div class="card">${[['تقرير الربع الثالث 2026','أكتوبر 2026'],['تقرير الإطلاق — الشهر الأول','يوليو 2026'],['تقرير الأثر نصف السنوي','قريباً']].map(r=>`<div class="list-item"><span style="font-size:22px">📄</span><div style="flex:1"><b>${r[0]}</b><div class="small muted">${r[1]}</div></div>${r[1]==='قريباً'?'<span class="chip">قريباً</span>':`<button class="btn btn-g btn-sm" onclick="toast('في النسخة الفعلية: تنزيل PDF')">عرض</button>`}</div>`).join('')}</div>`}
+};
+
+/* ============ SCENARIOS ============ */
+let GUIDE=null;
+function openScenarios(){modal(`<h2>🧭 سيناريوهات العرض</h2><p class="muted small">اختاري سيناريو لتنتقلي للدور المناسب، وستظهر لك الخطوات في بطاقة جانبية.</p>${SCENARIOS.map((s,i)=>`<div class="scn-card"><div class="row between"><b>${i+1}. ${s.t}</b><span class="chip">${s.who}</span></div><div class="small muted" style="margin:6px 0">${s.steps.length} خطوات</div><button class="btn btn-p btn-sm" onclick="startScenario(${i})">ابدئي السيناريو</button></div>`).join('')}`)}
+function startScenario(i){closeModal();GUIDE={i,done:[]};SCENARIOS[i].go();drawGuide()}
+function drawGuide(){const g=$('#guide');if(!GUIDE){g.classList.remove('on');return}const s=SCENARIOS[GUIDE.i];g.innerHTML=`<div class="hd"><b class="small">🧭 ${s.t}</b><button onclick="GUIDE=null;drawGuide()">✕</button></div><ol>${s.steps.map((t,j)=>`<li class="${GUIDE.done.includes(j)?'done':''}" onclick="const d=GUIDE.done;d.includes(${j})?d.splice(d.indexOf(${j}),1):d.push(${j});drawGuide()">${t}</li>`).join('')}</ol><div style="padding:0 14px 12px" class="row between"><span class="small muted">اضغطي الخطوة لتعليمها ✓</span><button class="btn btn-g btn-sm" onclick="openScenarios()">سيناريو آخر</button></div>`;g.classList.add('on')}
+
+render();
+</script>
+</body>
+</html>
